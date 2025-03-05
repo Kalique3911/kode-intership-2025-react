@@ -1,5 +1,5 @@
 import axios from "axios"
-import { Department, Users, Error } from "../../types"
+import { Department, Users, Error } from "../types"
 
 const API_URL = "https://stoplight.io/mocks/kode-frontend-team/koder-stoplight/86566464/users"
 
