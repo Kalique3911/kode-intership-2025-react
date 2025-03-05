@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
 import { fetchAllUsers, fetchUsersByDepartment, fetchDynamicUsers, fetchError500 } from "../../api"
-import { QueryParams, Users, Error, DisplayedUser, User } from "../../types"
+import { QueryParams, Users, Error, DisplayedUser, User, Department } from "../../types"
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async (params: QueryParams): Promise<Users> => {
     let response
@@ -22,6 +22,7 @@ export const fetchError = createAsyncThunk("users/fetchError", async (): Promise
 
 const initialState = {
     users: null as null | DisplayedUser[],
+    displayedUsers: null as null | DisplayedUser[],
     loading: false,
     error: null as string | null,
 }
@@ -29,7 +30,14 @@ const initialState = {
 const usersSlice = createSlice({
     name: "users",
     initialState,
-    reducers: {},
+    reducers: {
+        inputFilter(state, action: PayloadAction<string>) {
+            if (state.users) {
+                const searchQuery = action.payload.toLowerCase().trim()
+                state.displayedUsers = state.users.filter((user: DisplayedUser) => user.firstName.toLowerCase().includes(searchQuery) || user.lastName.toLowerCase().includes(searchQuery) || user.userTag.toLowerCase().includes(searchQuery))
+            }
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchUsers.pending, (state) => {
@@ -42,6 +50,7 @@ const usersSlice = createSlice({
                     ...user,
                     department: transformDepartment(user.department),
                 }))
+                state.displayedUsers = state.users
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.loading = false
@@ -54,8 +63,8 @@ const transformDepartment = (department: string): string => {
     const departmentMap: Record<string, string> = {
         android: "Android",
         ios: "iOS",
-        design: "Дизайн",
-        management: "Менеджмент",
+        design: "Designers",
+        management: "Managers",
         qa: "QA",
         back_office: "Бэк-офис",
         frontend: "Frontend",
@@ -63,9 +72,29 @@ const transformDepartment = (department: string): string => {
         pr: "PR",
         backend: "Backend",
         support: "Техподдержка",
-        analytics: "Аналитика",
+        analytics: "Analysts",
     }
     return departmentMap[department] || ""
 }
+
+export const reverseTransformDepartment = (department: string): Department => {
+    const departmentMap: Record<string, Department> = {
+        Android: "android",
+        iOS: "ios",
+        Designers: "design",
+        Managers: "management",
+        QA: "qa",
+        "Бэк-офис": "back_office",
+        Frontend: "frontend",
+        HR: "hr",
+        PR: "pr",
+        Backend: "backend",
+        Техподдержка: "support",
+        Analysts: "analytics",
+    }
+    return departmentMap[department]
+}
+
+export const { inputFilter } = usersSlice.actions
 
 export default usersSlice.reducer
