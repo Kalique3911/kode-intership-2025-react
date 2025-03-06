@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux"
 import { AppDispatch } from "../store/store"
 import { fetchUsers, inputFilter, reverseTransformDepartment } from "../store/slices/usersSlice"
 import { Department } from "../types"
+import Modal from "./Modal"
 
 const Container = styled.div`
     font-family: sans-serif;
@@ -24,6 +25,23 @@ const SearchInput = styled.input`
     outline: none;
 `
 
+const ModalButton = styled.div`
+    width: 20px;
+    height: 20px;
+    background: #666;
+    cursor: pointer;
+`
+
+const ModalLabel = styled.label``
+
+const ModalCheckBox = styled.input.attrs({ type: "checkbox" })`
+    type: checkbox;
+`
+
+const ModalTitle = styled.h2`
+    justify-self: center;
+`
+
 const Tabs = styled.div`
     display: flex;
     gap: 16px;
@@ -38,6 +56,7 @@ const TabItem = styled.div`
 const TopAppBar = () => {
     const dispatch = useDispatch<AppDispatch>()
     const [searchValue, setSearchValue] = useState("")
+    const [modal, setModal] = useState(false)
     const [selectedDepartment, setSelectedDepartment] = useState<Department | undefined>()
 
     const debouncedSearchQuery = useDebounce(searchValue, 400)
@@ -62,12 +81,19 @@ const TopAppBar = () => {
         const item = event.target as HTMLDivElement
         setSelectedDepartment(reverseTransformDepartment(item.innerHTML))
     }
+    const filterClickHandler = () => {
+        setModal(true)
+    }
+    const closeModal = () => {
+        setModal(false)
+    }
     return (
         <Container>
             <Title>Поиск</Title>
 
             <SearchWrapper>
                 <SearchInput onChange={handleInputChange} />
+                <ModalButton onClick={filterClickHandler} />
             </SearchWrapper>
 
             <Tabs>
@@ -78,6 +104,18 @@ const TopAppBar = () => {
                 <TabItem onClick={handleDepartmentChange}>iOS</TabItem>
                 <TabItem onClick={handleDepartmentChange}>Android</TabItem>
             </Tabs>
+
+            <Modal isOpen={modal} onClose={closeModal}>
+                <ModalTitle>Сортировка</ModalTitle>
+                <ModalLabel>
+                    <ModalCheckBox />
+                    По алфавиту
+                </ModalLabel>
+                <ModalLabel>
+                    <ModalCheckBox />
+                    По дню рождения
+                </ModalLabel>
+            </Modal>
         </Container>
     )
 }
