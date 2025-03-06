@@ -35,7 +35,7 @@ const TabItem = styled.div`
     cursor: pointer;
 `
 
-const SearchComponent = () => {
+const TopAppBar = () => {
     const dispatch = useDispatch<AppDispatch>()
     const [searchValue, setSearchValue] = useState("")
     const [selectedDepartment, setSelectedDepartment] = useState<Department | undefined>()
@@ -52,7 +52,7 @@ const SearchComponent = () => {
 
     useEffect(() => {
         console.log(debouncedSearchQuery)
-        dispatch(inputFilter(debouncedSearchQuery))
+        if (debouncedSearchQuery.length > 2 || debouncedSearchQuery.trim() === "") dispatch(inputFilter(debouncedSearchQuery))
     }, [debouncedSearchQuery, dispatch])
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,4 +82,4 @@ const SearchComponent = () => {
     )
 }
 
-export default SearchComponent
+export default TopAppBar
