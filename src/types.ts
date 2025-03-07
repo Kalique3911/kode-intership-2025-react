@@ -22,6 +22,7 @@ export type DisplayedUser = {
     position: string
     birthday: string
     phone: string
+    firstNextYear: boolean
 }
 
 export type Users = {

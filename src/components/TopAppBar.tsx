@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
 import styled from "styled-components"
 import { useDebounce } from "../hooks/useDebounce"
-import { useDispatch } from "react-redux"
-import { AppDispatch } from "../store/store"
-import { fetchUsers, inputFilter, reverseTransformDepartment } from "../store/slices/usersSlice"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "../store/store"
+import { fetchUsers, inputFilter, reverseTransformDepartment, sortByAlphabet, sortByBirthday } from "../store/slices/usersSlice"
 import { Department } from "../types"
 import Modal from "./Modal"
 
@@ -32,7 +32,7 @@ const ModalButton = styled.div`
     cursor: pointer;
 `
 
-const ModalLabel = styled.label``
+const ModalLabel = styled.div``
 
 const ModalCheckBox = styled.input.attrs({ type: "checkbox" })`
     type: checkbox;
@@ -58,6 +58,7 @@ const TopAppBar = () => {
     const [searchValue, setSearchValue] = useState("")
     const [modal, setModal] = useState(false)
     const [selectedDepartment, setSelectedDepartment] = useState<Department | undefined>()
+    const { sorting } = useSelector((state: RootState) => state.users)
 
     const debouncedSearchQuery = useDebounce(searchValue, 400)
 
@@ -70,7 +71,6 @@ const TopAppBar = () => {
     }, [dispatch, selectedDepartment])
 
     useEffect(() => {
-        console.log(debouncedSearchQuery)
         if (debouncedSearchQuery.length > 2 || debouncedSearchQuery.trim() === "") dispatch(inputFilter(debouncedSearchQuery))
     }, [debouncedSearchQuery, dispatch])
 
@@ -86,6 +86,13 @@ const TopAppBar = () => {
     }
     const closeModal = () => {
         setModal(false)
+    }
+    const checkBoxClickHandler = (value: "alphabet" | "birthday") => {
+        if (value === "alphabet") {
+            dispatch(sortByAlphabet())
+        } else {
+            dispatch(sortByBirthday())
+        }
     }
     return (
         <Container>
@@ -107,12 +114,12 @@ const TopAppBar = () => {
 
             <Modal isOpen={modal} onClose={closeModal}>
                 <ModalTitle>Сортировка</ModalTitle>
-                <ModalLabel>
-                    <ModalCheckBox />
+                <ModalLabel onClick={() => checkBoxClickHandler("alphabet")}>
+                    <ModalCheckBox checked={sorting === "alphabet"} readOnly={true} />
                     По алфавиту
                 </ModalLabel>
-                <ModalLabel>
-                    <ModalCheckBox />
+                <ModalLabel onClick={() => checkBoxClickHandler("birthday")}>
+                    <ModalCheckBox checked={sorting === "birthday"} readOnly={true} />
                     По дню рождения
                 </ModalLabel>
             </Modal>
