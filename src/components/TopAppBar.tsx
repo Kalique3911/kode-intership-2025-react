@@ -9,6 +9,7 @@ import Modal from "./Modal"
 
 const Container = styled.div`
     font-family: sans-serif;
+    margin: 0 8px 0 8px;
 `
 const Title = styled.h1``
 

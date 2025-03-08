@@ -4,21 +4,34 @@ import { RootState } from "../store/store"
 import TopAppBar from "../components/TopAppBar"
 import styled from "styled-components"
 import Divider from "../components/Divider"
+import { Link } from "react-router-dom"
 
-const Container = styled.div`
+const Container = styled.div<{ isEmpty: boolean }>`
     font-family: sans-serif;
+    height: ${({ isEmpty }) => (isEmpty ? "100vh" : "")};
+    display: flex;
+    flex-direction: column;
 `
 
-const UserList = styled.div`
-    margin-top: 24px;
+const UserList = styled.div<{ isEmpty: boolean }>`
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: ${({ isEmpty }) => (isEmpty ? "center" : "flex-start")};
+    align-items: center;
+    margin: ${({ isEmpty }) => (isEmpty ? "0 8px 30% 8px" : "24px 8px 0 8px")};
 `
 
-const UserCard = styled.div`
+const UserCard = styled(Link)`
     display: flex;
     align-items: center;
     padding: 16px;
     cursor: pointer;
     transition: background-color 0.2s;
+    text-decoration: none;
+    color: black;
+    width: 100%;
+    box-sizing: border-box;
 
     &:hover {
         background-color: #f5f5f5;
@@ -59,37 +72,45 @@ const UserDepartment = styled.div`
 const UserBirthday = styled.div<{ sorting: "alphabet" | "birthday" }>`
     font-size: 14px;
     color: #666;
-    position: absolute; /* Позиционируем по центру справа */
-    top: 50%; /* Смещаем на 50% вниз */
-    right: 0; /* Прижимаем к правому краю */
-    transform: translateY(-50%); /* Центрируем по вертикали */
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
     display: ${({ sorting }) => (sorting === "alphabet" ? "none" : "block")};
+`
+
+const NothingFound = styled.h2`
+    text-align: center;
 `
 
 const HomePage: React.FC = () => {
     const { displayedUsers, sorting } = useSelector((state: RootState) => state.users)
 
     return (
-        <Container>
+        <Container isEmpty={!displayedUsers || displayedUsers.length === 0}>
             <TopAppBar />
-            <UserList>
-                {displayedUsers?.map((user) => (
-                    <>
-                        {user.firstNextYear && <Divider text={new Date().getFullYear().toString()} />}
-                        <UserCard>
-                            <Avatar src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
-                            <UserInfo>
-                                <UserName>
-                                    {`${user.firstName} ${user.lastName}`}
-                                    <UserTag>{user.userTag}</UserTag>
-                                </UserName>
+            <UserList isEmpty={!displayedUsers || displayedUsers.length === 0}>
+                {displayedUsers?.length !== 0 ? (
+                    displayedUsers?.map((user) => (
+                        <>
+                            {user.firstNextYear && <Divider text={new Date().getFullYear().toString()} />}
+                            <UserCard to={`/${user.id}`}>
+                                <Avatar src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
+                                <UserInfo>
+                                    <UserName>
+                                        {`${user.firstName} ${user.lastName}`}
+                                        <UserTag>{user.userTag}</UserTag>
+                                    </UserName>
 
-                                <UserDepartment>{user.department}</UserDepartment>
-                                <UserBirthday sorting={sorting}>{user.birthday}</UserBirthday>
-                            </UserInfo>
-                        </UserCard>
-                    </>
-                ))}
+                                    <UserDepartment>{user.department}</UserDepartment>
+                                    <UserBirthday sorting={sorting}>{user.birthday}</UserBirthday>
+                                </UserInfo>
+                            </UserCard>
+                        </>
+                    ))
+                ) : (
+                    <NothingFound>Мы ничего не нашли</NothingFound>
+                )}
             </UserList>
         </Container>
     )

@@ -20,6 +20,42 @@ export const fetchError = createAsyncThunk("users/fetchError", async (): Promise
     return response
 })
 
+const sortByBirthdayLogic = (displayedUsers: DisplayedUser[]) => {
+    const today = new Date()
+    const currentYear = today.getFullYear()
+
+    const getBirthday = (birthday: string): { date: Date; days: number } => {
+        const birthDate = new Date(birthday)
+        const nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate())
+
+        if (nextBirthday < today) {
+            nextBirthday.setFullYear(currentYear + 1)
+        }
+
+        const timeDiff = nextBirthday.getTime() - today.getTime()
+        return { date: nextBirthday, days: Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) }
+    }
+
+    const currentYearUsers: DisplayedUser[] = []
+    const nextYearUsers: DisplayedUser[] = []
+
+    displayedUsers.forEach((user) => {
+        const daysUntilBirthday = getBirthday(user.birthday)
+
+        if (daysUntilBirthday.date.getFullYear() === currentYear) {
+            currentYearUsers.push(user)
+        } else {
+            nextYearUsers.push(user)
+        }
+    })
+
+    currentYearUsers.sort((a, b) => getBirthday(a.birthday).days - getBirthday(b.birthday).days)
+    nextYearUsers.sort((a, b) => getBirthday(a.birthday).days - getBirthday(b.birthday).days)
+    if (nextYearUsers[0]) nextYearUsers[0] = { ...nextYearUsers[0], firstNextYear: true }
+
+    return [...currentYearUsers, ...nextYearUsers]
+}
+
 const initialState = {
     users: null as null | DisplayedUser[],
     displayedUsers: null as null | DisplayedUser[],
@@ -36,6 +72,11 @@ const usersSlice = createSlice({
             if (state.users) {
                 const searchQuery = action.payload.toLowerCase().trim()
                 state.displayedUsers = state.users.filter((user: DisplayedUser) => user.firstName.toLowerCase().includes(searchQuery) || user.lastName.toLowerCase().includes(searchQuery) || user.userTag.toLowerCase().includes(searchQuery))
+                if (state.sorting === "alphabet") {
+                    state.displayedUsers.sort((a, b) => a.firstName.localeCompare(b.firstName))
+                } else {
+                    state.displayedUsers = sortByBirthdayLogic(state.displayedUsers)
+                }
             }
         },
         sortByAlphabet(state) {
@@ -48,39 +89,7 @@ const usersSlice = createSlice({
         sortByBirthday(state) {
             state.sorting = "birthday"
             if (state.displayedUsers) {
-                const today = new Date()
-                const currentYear = today.getFullYear()
-
-                const getBirthday = (birthday: string): { date: Date; days: number } => {
-                    const birthDate = new Date(birthday)
-                    const nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate())
-
-                    if (nextBirthday < today) {
-                        nextBirthday.setFullYear(currentYear + 1)
-                    }
-
-                    const timeDiff = nextBirthday.getTime() - today.getTime()
-                    return { date: nextBirthday, days: Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) }
-                }
-
-                const currentYearUsers: DisplayedUser[] = []
-                const nextYearUsers: DisplayedUser[] = []
-
-                state.displayedUsers.forEach((user) => {
-                    const daysUntilBirthday = getBirthday(user.birthday)
-
-                    if (daysUntilBirthday.date.getFullYear() === currentYear) {
-                        currentYearUsers.push(user)
-                    } else {
-                        nextYearUsers.push(user)
-                    }
-                })
-
-                currentYearUsers.sort((a, b) => getBirthday(a.birthday).days - getBirthday(b.birthday).days)
-                nextYearUsers.sort((a, b) => getBirthday(a.birthday).days - getBirthday(b.birthday).days)
-                if (nextYearUsers[0]) nextYearUsers[0] = { ...nextYearUsers[0], firstNextYear: true }
-
-                state.displayedUsers = [...currentYearUsers, ...nextYearUsers]
+                state.displayedUsers = sortByBirthdayLogic(state.displayedUsers)
             }
         },
     },
@@ -98,7 +107,11 @@ const usersSlice = createSlice({
                     firstNextYear: false,
                 }))
                 state.displayedUsers = state.users
-                state.displayedUsers.sort((a, b) => a.firstName.localeCompare(b.firstName))
+                if (state.sorting === "alphabet") {
+                    state.displayedUsers.sort((a, b) => a.firstName.localeCompare(b.firstName))
+                } else {
+                    state.displayedUsers = sortByBirthdayLogic(state.displayedUsers)
+                }
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.loading = false

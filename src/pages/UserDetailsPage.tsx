@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../store/store"
 import styled from "styled-components"
 import { fetchUsers } from "../store/slices/usersSlice"
+import { Link, useParams } from "react-router-dom"
 
 const Container = styled.div`
     display: flex;
@@ -22,7 +23,7 @@ const UserCard = styled.div`
     position: relative;
 `
 
-const BackButton = styled.a`
+const BackButton = styled(Link)`
     position: absolute;
     top: 24px;
     left: 24px;
@@ -77,20 +78,24 @@ const Age = styled.div`
     font-size: 16px;
     color: #666;
 `
+const PhoneLink = styled.a`
+    text-decoration: none;
+    color: black;
+`
 
 const UserDetailsPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>()
+    const { id } = useParams<{ id: string }>()
     const { displayedUsers } = useSelector((state: RootState) => state.users)
+    const user = displayedUsers?.find((u) => u.id === id)
 
     useEffect(() => {
-        dispatch(fetchUsers({}))
-    }, [dispatch])
+        if (!displayedUsers) dispatch(fetchUsers({}))
+    }, [dispatch, displayedUsers])
 
-    if (!displayedUsers || displayedUsers.length === 0) {
+    if (!user) {
         return <div>Пользователь не найден</div>
     }
-
-    const user = displayedUsers[0]
 
     const calculateAge = (birthday: string): number => {
         const birthDate = new Date(birthday)
@@ -106,7 +111,7 @@ const UserDetailsPage: React.FC = () => {
     return (
         <Container>
             <UserCard>
-                <BackButton>Назад</BackButton>
+                <BackButton to={"/"}>Назад</BackButton>
                 <Avatar src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
                 <UserName>
                     {`${user.firstName} ${user.lastName}`}
@@ -118,7 +123,7 @@ const UserDetailsPage: React.FC = () => {
             <UserDetails>
                 <DetailItem>Дата рождения: {user.birthday}</DetailItem>
                 <DetailItem>
-                    Телефон: <a href={`tel:${user.phone}`}>{user.phone}</a>
+                    Телефон: <PhoneLink href={`tel:${user.phone}`}>{user.phone}</PhoneLink>
                 </DetailItem>
                 <Age>{calculateAge(user.birthday)} лет</Age>
             </UserDetails>

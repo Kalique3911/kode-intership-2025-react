@@ -1,14 +1,12 @@
 import React from "react"
 import styled from "styled-components"
 
-// Типы для пропсов
 interface ModalProps {
     isOpen: boolean
     onClose: () => void
     children: React.ReactNode
 }
 
-// Стили для затемненного фона
 const Overlay = styled.div<{ $isOpen: boolean }>`
     position: fixed;
     top: 0;
@@ -22,7 +20,6 @@ const Overlay = styled.div<{ $isOpen: boolean }>`
     transition: opacity 0.1s ease, visibility 0.1s ease;
 `
 
-// Стили для модального окна
 const ModalWrapper = styled.div<{ $isOpen: boolean }>`
     position: fixed;
     top: 50%;
