@@ -1,3 +1,6 @@
+@import "inter-ui/inter.css";
+
 body {
+    font-family: "Inter", sans-serif;
     margin: 0;
 }

@@ -120,7 +120,7 @@ const usersSlice = createSlice({
     },
 })
 
-const transformDepartment = (department: string): string => {
+export const transformDepartment = (department: string): string => {
     const departmentMap: Record<string, string> = {
         android: "Android",
         ios: "iOS",

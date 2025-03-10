@@ -9,7 +9,6 @@ const Container = styled.div`
     display: flex;
     flex-direction: column;
     height: 100vh;
-    font-family: sans-serif;
 `
 
 const UserCard = styled.div`

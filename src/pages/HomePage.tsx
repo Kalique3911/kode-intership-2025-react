@@ -6,20 +6,19 @@ import styled from "styled-components"
 import Divider from "../components/Divider"
 import { Link } from "react-router-dom"
 
-const Container = styled.div<{ isEmpty: boolean }>`
-    font-family: sans-serif;
-    height: ${({ isEmpty }) => (isEmpty ? "100vh" : "")};
+const Container = styled.div<{ $isEmpty: boolean }>`
+    height: ${({ $isEmpty }) => ($isEmpty ? "100vh" : "")};
     display: flex;
     flex-direction: column;
 `
 
-const UserList = styled.div<{ isEmpty: boolean }>`
+const UserList = styled.div<{ $isEmpty: boolean }>`
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    justify-content: ${({ isEmpty }) => (isEmpty ? "center" : "flex-start")};
+    justify-content: ${({ $isEmpty }) => ($isEmpty ? "center" : "flex-start")};
     align-items: center;
-    margin: ${({ isEmpty }) => (isEmpty ? "0 8px 30% 8px" : "24px 8px 0 8px")};
+    margin: ${({ $isEmpty }) => ($isEmpty ? "0 8px 30% 8px" : "24px 8px 0 8px")};
 `
 
 const UserCard = styled(Link)`
@@ -87,12 +86,12 @@ const HomePage: React.FC = () => {
     const { displayedUsers, sorting } = useSelector((state: RootState) => state.users)
 
     return (
-        <Container isEmpty={!displayedUsers || displayedUsers.length === 0}>
+        <Container $isEmpty={!displayedUsers || displayedUsers.length === 0}>
             <TopAppBar />
-            <UserList isEmpty={!displayedUsers || displayedUsers.length === 0}>
+            <UserList $isEmpty={!displayedUsers || displayedUsers.length === 0}>
                 {displayedUsers?.length !== 0 ? (
                     displayedUsers?.map((user) => (
-                        <>
+                        <React.Fragment key={user.id}>
                             {user.firstNextYear && <Divider text={new Date().getFullYear().toString()} />}
                             <UserCard to={`/${user.id}`}>
                                 <Avatar src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
@@ -106,7 +105,7 @@ const HomePage: React.FC = () => {
                                     <UserBirthday sorting={sorting}>{user.birthday}</UserBirthday>
                                 </UserInfo>
                             </UserCard>
-                        </>
+                        </React.Fragment>
                     ))
                 ) : (
                     <NothingFound>Мы ничего не нашли</NothingFound>
