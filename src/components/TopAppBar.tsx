@@ -98,14 +98,6 @@ const ModalButton = styled.img<{ visible: boolean }>`
     transition: opacity 0.3s ease;
 `
 
-const ModalLabel = styled.div``
-
-const ModalCheckBox = styled.input.attrs({ type: "checkbox" })``
-
-const ModalTitle = styled.h2`
-    justify-self: center;
-`
-
 const Tabs = styled.div`
     display: flex;
     gap: 16px;
@@ -121,6 +113,30 @@ const TabItem = styled.div<{ selected: boolean | undefined }>`
     border-bottom: ${({ selected }) => (selected ? "2px solid #6534ff" : "2px solid #FFFFFF")};
     align-items: center;
     transition: color 0.3s ease, border-bottom 0.3s ease;
+`
+
+const ModalLabel = styled.label`
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+`
+
+const ModalCheckBox = styled.input.attrs({ type: "checkbox" })`
+    will-change: border-width;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    margin: 15px 15px 15px 4px;
+    border: 2px solid #6534ff;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:checked {
+        border-width: 5px;
+    }
 `
 
 const TopAppBar = () => {
@@ -178,9 +194,9 @@ const TopAppBar = () => {
                         <SearchIcon src={focusedSearchIcon} visible={inputFocus} />
                     </SearchIconWrapper>
                     <SearchInput onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
-                    <ModalButtonWrapper>
-                        <ModalButton src={modalIcon} onClick={filterClickHandler} visible={sorting === "alphabet"} />
-                        <ModalButton src={birthdayModalIcon} onClick={filterClickHandler} visible={sorting === "birthday"} />
+                    <ModalButtonWrapper onClick={filterClickHandler}>
+                        <ModalButton src={modalIcon} visible={sorting === "alphabet"} />
+                        <ModalButton src={birthdayModalIcon} visible={sorting === "birthday"} />
                     </ModalButtonWrapper>
                 </SearchWrapper>
             </SearchContainer>
@@ -207,13 +223,12 @@ const TopAppBar = () => {
             </Tabs>
 
             <Modal isOpen={modal} onClose={closeModal}>
-                <ModalTitle>Сортировка</ModalTitle>
-                <ModalLabel onClick={() => checkBoxClickHandler("alphabet")}>
-                    <ModalCheckBox checked={sorting === "alphabet"} readOnly={true} />
+                <ModalLabel onClick={() => checkBoxClickHandler("alphabet")} htmlFor="alphabet-checkbox">
+                    <ModalCheckBox checked={sorting === "alphabet"} readOnly={true} id="alphabet-checkbox" />
                     По алфавиту
                 </ModalLabel>
-                <ModalLabel onClick={() => checkBoxClickHandler("birthday")}>
-                    <ModalCheckBox checked={sorting === "birthday"} readOnly={true} />
+                <ModalLabel onClick={() => checkBoxClickHandler("birthday")} htmlFor="birthday-checkbox">
+                    <ModalCheckBox checked={sorting === "birthday"} readOnly={true} id="birthday-checkbox" />
                     По дню рождения
                 </ModalLabel>
             </Modal>
