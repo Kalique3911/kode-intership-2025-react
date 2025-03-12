@@ -29,11 +29,6 @@ export type Users = {
     items: User[]
 }
 
-export type Error = {
-    message: string
-    code?: number
-}
-
 export type QueryParams = {
     __example?: Department
     __dynamic?: boolean

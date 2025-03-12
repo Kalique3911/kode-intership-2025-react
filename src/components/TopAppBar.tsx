@@ -69,12 +69,12 @@ const SearchIconWrapper = styled.div`
     position: relative;
 `
 
-const SearchIcon = styled.img<{ visible: boolean }>`
+const SearchIcon = styled.img<{ $visible: boolean }>`
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: ${({ visible }) => (visible ? 1 : 0)};
+    opacity: ${({ $visible }) => ($visible ? 1 : 0)};
     transition: opacity 0.3s ease;
 `
 
@@ -89,12 +89,12 @@ const ModalButtonWrapper = styled.div`
     position: relative;
 `
 
-const ModalButton = styled.img<{ visible: boolean }>`
+const ModalButton = styled.img<{ $visible: boolean }>`
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: ${({ visible }) => (visible ? 1 : 0)};
+    opacity: ${({ $visible }) => ($visible ? 1 : 0)};
     transition: opacity 0.3s ease;
 `
 
@@ -167,6 +167,8 @@ const TopAppBar = () => {
     const handleDepartmentChange = (event: React.MouseEvent<HTMLDivElement>) => {
         const item = event.target as HTMLDivElement
         setSelectedDepartment(reverseTransformDepartment(item.innerHTML))
+        const input = document.getElementById("searchInput") as HTMLInputElement
+        input.value = ""
     }
     const filterClickHandler = () => {
         setModal(true)
@@ -190,13 +192,13 @@ const TopAppBar = () => {
             <SearchContainer>
                 <SearchWrapper>
                     <SearchIconWrapper>
-                        <SearchIcon src={searchIcon} visible={!inputFocus} />
-                        <SearchIcon src={focusedSearchIcon} visible={inputFocus} />
+                        <SearchIcon src={searchIcon} $visible={!inputFocus} />
+                        <SearchIcon src={focusedSearchIcon} $visible={inputFocus} />
                     </SearchIconWrapper>
-                    <SearchInput onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
+                    <SearchInput id="searchInput" onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
                     <ModalButtonWrapper onClick={filterClickHandler}>
-                        <ModalButton src={modalIcon} visible={sorting === "alphabet"} />
-                        <ModalButton src={birthdayModalIcon} visible={sorting === "birthday"} />
+                        <ModalButton src={modalIcon} $visible={sorting === "alphabet"} />
+                        <ModalButton src={birthdayModalIcon} $visible={sorting === "birthday"} />
                     </ModalButtonWrapper>
                 </SearchWrapper>
             </SearchContainer>

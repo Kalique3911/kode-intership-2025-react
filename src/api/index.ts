@@ -1,5 +1,5 @@
 import axios from "axios"
-import { Department, Users, Error } from "../types"
+import { Department, Users } from "../types"
 
 const API_URL = "https://stoplight.io/mocks/kode-frontend-team/koder-stoplight/86566464/users"
 
@@ -9,7 +9,7 @@ export const fetchAllUsers = async (): Promise<Users> => {
         return response.data
     } catch (error) {
         console.error("Error fetching all users:", error)
-        throw error
+        throw new Error("Произошла ошибка при загрузке данных")
     }
 }
 
@@ -19,7 +19,7 @@ export const fetchUsersByDepartment = async (department: Department): Promise<Us
         return response.data
     } catch (error) {
         console.error(`Error fetching users from ${department}:`, error)
-        throw error
+        throw new Error("Произошла ошибка при загрузке данных")
     }
 }
 
@@ -29,7 +29,7 @@ export const fetchDynamicUsers = async (): Promise<Users> => {
         return response.data
     } catch (error) {
         console.error("Error fetching dynamic users:", error)
-        throw error
+        throw new Error("Произошла ошибка при загрузке данных")
     }
 }
 
@@ -39,6 +39,6 @@ export const fetchError500 = async (): Promise<Error> => {
         return response.data
     } catch (error) {
         console.error("Error fetching 500 error:", error)
-        throw error
+        throw new Error("Произошла ошибка при загрузке данных")
     }
 }

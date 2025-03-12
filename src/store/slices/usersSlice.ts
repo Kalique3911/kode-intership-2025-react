@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
 import { fetchAllUsers, fetchUsersByDepartment, fetchDynamicUsers, fetchError500 } from "../../api"
-import { QueryParams, Users, Error, DisplayedUser, User, Department } from "../../types"
+import { QueryParams, Users, DisplayedUser, User, Department } from "../../types"
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async (params: QueryParams): Promise<Users> => {
     let response
@@ -115,7 +115,11 @@ const usersSlice = createSlice({
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.loading = false
-                state.error = action.payload as string
+                state.error = action.error.message as string
+            })
+            .addCase(fetchError.rejected, (state, action) => {
+                state.loading = false
+                state.error = action.error.message as string
             })
     },
 })
@@ -154,6 +158,17 @@ export const reverseTransformDepartment = (department: string): Department => {
         Analysts: "analytics",
     }
     return departmentMap[department]
+}
+
+export const getDisplayedBirthday = (dateString: string) => {
+    const date = new Date(dateString)
+
+    const day = date.getDate()
+
+    const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
+    const month = monthNames[date.getMonth()]
+
+    return `${day} ${month}`
 }
 
 export const { inputFilter, sortByAlphabet, sortByBirthday } = usersSlice.actions
