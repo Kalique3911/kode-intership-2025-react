@@ -160,7 +160,7 @@ export const reverseTransformDepartment = (department: string): Department => {
     return departmentMap[department]
 }
 
-export const getDisplayedBirthday = (dateString: string) => {
+export const getBriefDisplayedBirthday = (dateString: string) => {
     const date = new Date(dateString)
 
     const day = date.getDate()
@@ -169,6 +169,61 @@ export const getDisplayedBirthday = (dateString: string) => {
     const month = monthNames[date.getMonth()]
 
     return `${day} ${month}`
+}
+
+export const getFullfDisplayedBirthday = (dateString: string) => {
+    const date = new Date(dateString)
+
+    const day = date.getDate()
+    const year = date.getFullYear()
+
+    const monthNames = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"]
+    const month = monthNames[date.getMonth()]
+
+    return `${day} ${month} ${year}`
+}
+
+export const getAge = (dateString: string): string => {
+    const today = new Date()
+    const currentYear = today.getFullYear()
+    const birthDate = new Date(dateString)
+    const nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate())
+    let age = currentYear - birthDate.getFullYear() - 1
+
+    if (nextBirthday < today) {
+        age += 1
+    }
+
+    let ageString = age.toString()
+    const lastAgeNumber = ageString[ageString.length - 1]
+    if (lastAgeNumber === "2" || lastAgeNumber === "3" || lastAgeNumber === "4") {
+        ageString = ageString + " годa"
+    } else if (lastAgeNumber === "1") {
+        ageString = ageString + " год"
+    } else {
+        ageString = ageString + " лет"
+    }
+
+    return ageString
+}
+
+export const transFormPhoneNumber = (phoneNumber: string): string => {
+    return phoneNumber
+        .split("")
+        .map((char, i) => {
+            switch (i) {
+                case 1:
+                    return char + " ("
+                case 4:
+                    return char + ") "
+                case 7:
+                case 9:
+                    return char + " "
+                default:
+                    return char
+            }
+        })
+        .join("")
 }
 
 export const { inputFilter, sortByAlphabet, sortByBirthday } = usersSlice.actions

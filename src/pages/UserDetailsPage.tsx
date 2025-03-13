@@ -2,80 +2,106 @@ import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../store/store"
 import styled from "styled-components"
-import { fetchUsers } from "../store/slices/usersSlice"
+import { fetchUsers, getAge, getFullfDisplayedBirthday, transFormPhoneNumber } from "../store/slices/usersSlice"
 import { Link, useParams } from "react-router-dom"
+import backIcon from "../assets/BackIcon.svg"
+import phoneIcon from "../assets/PhoneIcon.svg"
+import birthIcon from "../assets/BirthIcon.svg"
 
 const Container = styled.div`
     display: flex;
     flex-direction: column;
+    gap: 8px;
     height: 100vh;
 `
 
 const UserCard = styled.div`
-    background-color: rgb(179, 179, 179);
-    color: white;
-    height: 40%;
+    background-color: #f7f7f8;
     display: flex;
+    height: 280px;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    box-sizing: border-box;
     position: relative;
 `
 
 const BackButton = styled(Link)`
     position: absolute;
-    top: 24px;
+    width: 24px;
+    height: 24px;
+    top: 22px;
     left: 24px;
-    color: white;
-    text-decoration: none;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
 `
 
-const Avatar = styled.img`
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    margin-bottom: 16px;
+const BackIcon = styled.img`
+    width: 8px;
+    height: 12px;
 `
 
-const UserName = styled.div`
+const Avatar = styled.img`
+    margin: 72px 0 24px 0;
+    width: 104px;
+    height: 104px;
+    border-radius: 64px;
+`
+
+const UserName = styled.h2`
     font-size: 24px;
-    font-weight: 500;
+    margin: 0 0 12px 0;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
 `
 
 const UserTag = styled.span`
-    font-size: 16px;
-    color: #ccc;
+    font-size: 17px;
+    color: #97979f;
+    font-weight: 400;
 `
 
 const UserDepartment = styled.div`
-    font-size: 16px;
-    color: #ccc;
-    margin-top: 8px;
+    font-size: 13px;
+    color: #55555c;
+    font-weight: 400;
 `
 
 const UserDetails = styled.div`
-    flex-grow: 1;
-    padding: 24px;
-    background-color: #f5f5f5;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 16px 0 16px;
 `
 
-const DetailItem = styled.div`
+const DetailItem = styled.div<{ $second: boolean }>`
+    display: grid;
+    grid-template-columns: ${({ $second }) => ($second ? "auto 1fr" : "auto 1fr auto")};
+    width: 100%;
+    height: 60px;
     font-size: 16px;
-    margin-bottom: 12px;
+    font-weight: 500;
+    align-items: center;
+    border-top: ${({ $second }) => ($second ? "0.5px solid #f7f7f8" : "")};
 `
+
+const DetailIconWrapper = styled.div`
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+`
+
+const DetailIcon = styled.img``
 
 const Age = styled.div`
-    position: absolute;
-    top: 24px;
-    right: 24px;
+    margin-right: 4px;
     font-size: 16px;
-    color: #666;
+    color: #97979b;
+    font-weight: 500;
 `
 const PhoneLink = styled.a`
     text-decoration: none;
@@ -93,24 +119,15 @@ const UserDetailsPage: React.FC = () => {
     }, [dispatch, displayedUsers])
 
     if (!user) {
-        return <div>Пользователь не найден</div>
-    }
-
-    const calculateAge = (birthday: string): number => {
-        const birthDate = new Date(birthday)
-        const today = new Date()
-        let age = today.getFullYear() - birthDate.getFullYear()
-        const monthDiff = today.getMonth() - birthDate.getMonth()
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--
-        }
-        return age
+        return <></>
     }
 
     return (
         <Container>
             <UserCard>
-                <BackButton to={"/"}>Назад</BackButton>
+                <BackButton to={"/"}>
+                    <BackIcon src={backIcon} />
+                </BackButton>
                 <Avatar src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
                 <UserName>
                     {`${user.firstName} ${user.lastName}`}
@@ -120,11 +137,19 @@ const UserDetailsPage: React.FC = () => {
             </UserCard>
 
             <UserDetails>
-                <DetailItem>Дата рождения: {user.birthday}</DetailItem>
-                <DetailItem>
-                    Телефон: <PhoneLink href={`tel:${user.phone}`}>{user.phone}</PhoneLink>
+                <DetailItem $second={false}>
+                    <DetailIconWrapper>
+                        <DetailIcon src={birthIcon} />
+                    </DetailIconWrapper>
+                    {getFullfDisplayedBirthday(user.birthday)}
+                    <Age>{getAge(user.birthday)}</Age>
                 </DetailItem>
-                <Age>{calculateAge(user.birthday)} лет</Age>
+                <DetailItem $second={true}>
+                    <DetailIconWrapper>
+                        <DetailIcon src={phoneIcon} />
+                    </DetailIconWrapper>
+                    <PhoneLink href={`tel:${user.phone}`}>{transFormPhoneNumber(user.phone)}</PhoneLink>
+                </DetailItem>
             </UserDetails>
         </Container>
     )

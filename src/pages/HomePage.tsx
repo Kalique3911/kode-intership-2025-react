@@ -5,7 +5,7 @@ import TopAppBar from "../components/TopAppBar"
 import styled from "styled-components"
 import YearDivider from "../components/YearDivider"
 import { Link } from "react-router-dom"
-import { getDisplayedBirthday } from "../store/slices/usersSlice"
+import { getBriefDisplayedBirthday } from "../store/slices/usersSlice"
 import nothingFoundIcon from "../assets/NothingFoundIcon.png"
 import errorIcon from "../assets/ErrorIcon.png"
 
@@ -267,7 +267,7 @@ const HomePage: React.FC = () => {
 
                                     <UserDepartment>{user.department}</UserDepartment>
                                 </UserInfo>
-                                <UserBirthday $sorting={sorting}>{getDisplayedBirthday(user.birthday)}</UserBirthday>
+                                <UserBirthday $sorting={sorting}>{getBriefDisplayedBirthday(user.birthday)}</UserBirthday>
                             </UserCard>
                         </React.Fragment>
                     ))}
