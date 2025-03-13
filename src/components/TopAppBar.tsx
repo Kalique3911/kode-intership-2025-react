@@ -158,7 +158,7 @@ const TopAppBar = () => {
     }, [dispatch, selectedDepartment])
 
     useEffect(() => {
-        if (debouncedSearchQuery.length > 2 || debouncedSearchQuery.trim() === "") dispatch(inputFilter(debouncedSearchQuery))
+        dispatch(inputFilter(debouncedSearchQuery))
     }, [debouncedSearchQuery, dispatch])
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,6 +182,7 @@ const TopAppBar = () => {
         } else {
             dispatch(sortByBirthday())
         }
+        closeModal()
     }
     return (
         <Container>

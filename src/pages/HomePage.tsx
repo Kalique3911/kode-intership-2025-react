@@ -9,18 +9,17 @@ import { getDisplayedBirthday } from "../store/slices/usersSlice"
 import nothingFoundIcon from "../assets/NothingFoundIcon.png"
 import errorIcon from "../assets/ErrorIcon.png"
 
-const Container = styled.div<{ $isEmpty: boolean }>`
+const Container = styled.div`
     height: 100vh;
     display: flex;
     flex-direction: column;
 `
 
-const UserList = styled.div<{ $isEmpty: boolean }>`
+const UserList = styled.div`
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     padding: 16px;
-    justify-content: ${({ $isEmpty }) => ($isEmpty ? "center" : "flex-start")};
     align-items: center;
     overflow-y: auto;
 `
@@ -216,9 +215,9 @@ const HomePage: React.FC = () => {
 
     if (loading) {
         return (
-            <Container $isEmpty={false}>
+            <Container>
                 <TopAppBar />
-                <UserList $isEmpty={false}>
+                <UserList>
                     {Array.from({ length: skeletonCount }).map((_, index) => (
                         <React.Fragment key={index}>
                             <Skeleton>
@@ -237,7 +236,7 @@ const HomePage: React.FC = () => {
 
     if (error) {
         return (
-            <Container $isEmpty={true}>
+            <Container>
                 <TopAppBar />
                 <ErrorContainer>
                     <ErrorIcon src={errorIcon} />
@@ -250,11 +249,11 @@ const HomePage: React.FC = () => {
     }
 
     return (
-        <Container $isEmpty={!displayedUsers || displayedUsers.length === 0}>
+        <Container>
             <TopAppBar />
 
             {displayedUsers?.length !== 0 ? (
-                <UserList $isEmpty={!displayedUsers || displayedUsers.length === 0}>
+                <UserList>
                     {displayedUsers?.map((user) => (
                         <React.Fragment key={user.id}>
                             {user.firstNextYear && <YearDivider text={new Date().getFullYear().toString()} />}

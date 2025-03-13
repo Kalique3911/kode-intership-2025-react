@@ -70,8 +70,8 @@ const usersSlice = createSlice({
     reducers: {
         inputFilter(state, action: PayloadAction<string>) {
             if (state.users) {
-                const searchQuery = action.payload.toLowerCase().trim()
-                state.displayedUsers = state.users.filter((user: DisplayedUser) => user.firstName.toLowerCase().includes(searchQuery) || user.lastName.toLowerCase().includes(searchQuery) || user.userTag.toLowerCase().includes(searchQuery))
+                const searchQuery = action.payload.toLowerCase()
+                state.displayedUsers = state.users.filter((user: DisplayedUser) => (user.firstName + " " + user.lastName).toLowerCase().includes(searchQuery) || user.userTag.toLowerCase().includes(searchQuery))
                 if (state.sorting === "alphabet") {
                     state.displayedUsers.sort((a, b) => a.firstName.localeCompare(b.firstName))
                 } else {
