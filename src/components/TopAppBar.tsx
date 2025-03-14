@@ -11,25 +11,28 @@ import focusedSearchIcon from "./../assets/FocusedSearchIcon.svg"
 import modalIcon from "./../assets/ModalIcon.svg"
 import birthdayModalIcon from "./../assets/BirthdayModalIcon.svg"
 import { displayedDepartments, reverseTransformDepartment, transformDepartment } from "../utils/usersUtils"
+import useNetworkStatus from "../hooks/useNetworkStatus"
 
-const Container = styled.div`
-    margin: 8px 0 0 0;
+const Container = styled.div``
+
+const TitleContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean }>`
     padding: 0 32px 0 32px;
-`
-const TitleContainer = styled.div`
-    margin: 0;
     height: 48px;
     align-content: center;
+    color: ${({ $isOnline, $isLoading }) => (!$isOnline || $isLoading ? " #ffffff;" : "")}
+    background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
 `
 
 const Title = styled.h1`
-    margin: 0;
+    margin: 8px 0 0 0;
     font-size: 24px;
 `
 
-const SearchContainer = styled.div`
+const SearchContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean }>`
+    padding: 0 32px 0 32px;
     height: 52px;
     align-content: center;
+    background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
 `
 
 const SearchWrapper = styled.div`
@@ -90,11 +93,23 @@ const ModalButtonWrapper = styled.div`
     position: relative;
 `
 
+const NetworkStatusElement = styled.div<{ $isOnline: boolean; $isLoading: boolean }>`
+    display: flex;
+    padding: 8px 24px 12px 24px;
+    box-sizing: border-box;
+    font-size: 13px;
+    font-weight: 500;
+    color: #ffffff;
+    background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
+`
+
 const Tabs = styled.div`
+    padding: 0 32px 0 32px;
     display: flex;
     gap: 16px;
     margin-top: 8px;
     height: 36px;
+    box-shadow: 0 0.3px 0 0.3px #c3c3c6;
 `
 
 const TabItem = styled.div<{ selected: boolean | undefined }>`
@@ -137,7 +152,9 @@ const TopAppBar = () => {
     const [inputFocus, setInputFocus] = useState(false)
     const [modal, setModal] = useState(false)
     const [selectedDepartment, setSelectedDepartment] = useState<Department | undefined>()
-    const { sorting } = useSelector((state: RootState) => state.users)
+    const { sorting, loading } = useSelector((state: RootState) => state.users)
+    const [networkIssues, setNetworkIssues] = useState(false)
+    const isOnline = useNetworkStatus()
 
     const debouncedSearchQuery = useDebounce(searchValue, 400)
 
@@ -153,14 +170,29 @@ const TopAppBar = () => {
         dispatch(inputFilter(debouncedSearchQuery))
     }, [debouncedSearchQuery, dispatch])
 
+    useEffect(() => {
+        if (!isOnline) {
+            setNetworkIssues(true)
+        }
+        if (isOnline && !loading) {
+            if (selectedDepartment) {
+                dispatch(fetchUsers({ __example: selectedDepartment })).finally(() => setNetworkIssues(false))
+            } else {
+                dispatch(fetchUsers({})).finally(() => setNetworkIssues(false))
+            }
+        }
+    }, [isOnline, dispatch, selectedDepartment])
+
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSearchValue(event.target.value)
     }
     const handleDepartmentChange = (event: React.MouseEvent<HTMLDivElement>) => {
-        const item = event.target as HTMLDivElement
-        setSelectedDepartment(reverseTransformDepartment(item.innerHTML))
-        const input = document.getElementById("searchInput") as HTMLInputElement
-        input.value = ""
+        if (isOnline) {
+            const item = event.target as HTMLDivElement
+            setSelectedDepartment(reverseTransformDepartment(item.innerHTML))
+            const input = document.getElementById("searchInput") as HTMLInputElement
+            if (input) input.value = ""
+        }
     }
     const filterClickHandler = () => {
         setModal(true)
@@ -178,22 +210,35 @@ const TopAppBar = () => {
     }
     return (
         <Container>
-            <TitleContainer>
+            <TitleContainer $isOnline={isOnline} $isLoading={loading && networkIssues}>
                 <Title>Поиск</Title>
             </TitleContainer>
 
-            <SearchContainer>
-                <SearchWrapper>
-                    <SearchIconWrapper>
-                        <InputIcon src={searchIcon} $visible={!inputFocus} />
-                        <InputIcon src={focusedSearchIcon} $visible={inputFocus} />
-                    </SearchIconWrapper>
-                    <SearchInput id="searchInput" onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
-                    <ModalButtonWrapper onClick={filterClickHandler}>
-                        <InputIcon src={modalIcon} $visible={sorting === "alphabet"} />
-                        <InputIcon src={birthdayModalIcon} $visible={sorting === "birthday"} />
-                    </ModalButtonWrapper>
-                </SearchWrapper>
+            <SearchContainer $isOnline={isOnline} $isLoading={loading && networkIssues}>
+                {!isOnline && (
+                    <NetworkStatusElement $isOnline={isOnline} $isLoading={loading && networkIssues}>
+                        Не могу обновить данные. Проверь соединение с интернетом.
+                    </NetworkStatusElement>
+                )}
+                {networkIssues && loading && (
+                    <NetworkStatusElement $isOnline={isOnline} $isLoading={loading && networkIssues}>
+                        Секундочку, гружусь...
+                    </NetworkStatusElement>
+                )}
+
+                {!(networkIssues && loading) && isOnline && (
+                    <SearchWrapper>
+                        <SearchIconWrapper>
+                            <InputIcon src={searchIcon} $visible={!inputFocus} />
+                            <InputIcon src={focusedSearchIcon} $visible={inputFocus} />
+                        </SearchIconWrapper>
+                        <SearchInput id="searchInput" onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
+                        <ModalButtonWrapper onClick={filterClickHandler}>
+                            <InputIcon src={modalIcon} $visible={sorting === "alphabet"} />
+                            <InputIcon src={birthdayModalIcon} $visible={sorting === "birthday"} />
+                        </ModalButtonWrapper>
+                    </SearchWrapper>
+                )}
             </SearchContainer>
 
             <Tabs>

@@ -8,6 +8,7 @@ import { Link } from "react-router-dom"
 import { getBriefDisplayedBirthday } from "../utils/usersUtils"
 import nothingFoundIcon from "../assets/NothingFoundIcon.png"
 import errorIcon from "../assets/ErrorIcon.png"
+import useNetworkStatus from "../hooks/useNetworkStatus"
 
 const Container = styled.div`
     height: 100vh;
@@ -193,6 +194,7 @@ const SkeletonDepartment = styled.div`
 const HomePage: React.FC = () => {
     const { displayedUsers, sorting, loading, error } = useSelector((state: RootState) => state.users)
     const [skeletonCount, setSkeletonCount] = useState(0)
+    const isOnline = useNetworkStatus()
 
     useEffect(() => {
         const calculateSkeletons = () => {
@@ -236,7 +238,7 @@ const HomePage: React.FC = () => {
         )
     }
 
-    if (error) {
+    if (error && isOnline) {
         return (
             <Container>
                 <TopAppBar />
