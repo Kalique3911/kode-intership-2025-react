@@ -3,13 +3,14 @@ import styled from "styled-components"
 import { useDebounce } from "../hooks/useDebounce"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../store/store"
-import { fetchUsers, inputFilter, reverseTransformDepartment, sortByAlphabet, sortByBirthday, transformDepartment } from "../store/slices/usersSlice"
+import { fetchUsers, inputFilter, sortByAlphabet, sortByBirthday } from "../store/slices/usersSlice"
 import { Department } from "../types"
 import Modal from "./Modal"
 import searchIcon from "./../assets/SearchIcon.svg"
 import focusedSearchIcon from "./../assets/FocusedSearchIcon.svg"
 import modalIcon from "./../assets/ModalIcon.svg"
 import birthdayModalIcon from "./../assets/BirthdayModalIcon.svg"
+import { displayedDepartments, reverseTransformDepartment, transformDepartment } from "../utils/usersUtils"
 
 const Container = styled.div`
     margin: 8px 0 0 0;
@@ -69,7 +70,7 @@ const SearchIconWrapper = styled.div`
     position: relative;
 `
 
-const SearchIcon = styled.img<{ $visible: boolean }>`
+const InputIcon = styled.img<{ $visible: boolean }>`
     position: absolute;
     top: 50%;
     left: 50%;
@@ -87,15 +88,6 @@ const ModalButtonWrapper = styled.div`
     cursor: pointer;
     margin-left: auto;
     position: relative;
-`
-
-const ModalButton = styled.img<{ $visible: boolean }>`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: ${({ $visible }) => ($visible ? 1 : 0)};
-    transition: opacity 0.3s ease;
 `
 
 const Tabs = styled.div`
@@ -193,13 +185,13 @@ const TopAppBar = () => {
             <SearchContainer>
                 <SearchWrapper>
                     <SearchIconWrapper>
-                        <SearchIcon src={searchIcon} $visible={!inputFocus} />
-                        <SearchIcon src={focusedSearchIcon} $visible={inputFocus} />
+                        <InputIcon src={searchIcon} $visible={!inputFocus} />
+                        <InputIcon src={focusedSearchIcon} $visible={inputFocus} />
                     </SearchIconWrapper>
                     <SearchInput id="searchInput" onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
                     <ModalButtonWrapper onClick={filterClickHandler}>
-                        <ModalButton src={modalIcon} $visible={sorting === "alphabet"} />
-                        <ModalButton src={birthdayModalIcon} $visible={sorting === "birthday"} />
+                        <InputIcon src={modalIcon} $visible={sorting === "alphabet"} />
+                        <InputIcon src={birthdayModalIcon} $visible={sorting === "birthday"} />
                     </ModalButtonWrapper>
                 </SearchWrapper>
             </SearchContainer>
@@ -208,21 +200,11 @@ const TopAppBar = () => {
                 <TabItem onClick={handleDepartmentChange} selected={selectedDepartment === undefined}>
                     Все
                 </TabItem>
-                <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === "Designers"}>
-                    Designers
-                </TabItem>
-                <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === "Analysts"}>
-                    Analysts
-                </TabItem>
-                <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === "Managers"}>
-                    Managers
-                </TabItem>
-                <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === "iOS"}>
-                    iOS
-                </TabItem>
-                <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === "Android"}>
-                    Android
-                </TabItem>
+                {displayedDepartments.map((department) => (
+                    <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === department}>
+                        {department}
+                    </TabItem>
+                ))}
             </Tabs>
 
             <Modal isOpen={modal} onClose={closeModal}>

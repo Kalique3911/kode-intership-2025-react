@@ -5,7 +5,7 @@ import TopAppBar from "../components/TopAppBar"
 import styled from "styled-components"
 import YearDivider from "../components/YearDivider"
 import { Link } from "react-router-dom"
-import { getBriefDisplayedBirthday } from "../store/slices/usersSlice"
+import { getBriefDisplayedBirthday } from "../utils/usersUtils"
 import nothingFoundIcon from "../assets/NothingFoundIcon.png"
 import errorIcon from "../assets/ErrorIcon.png"
 
@@ -22,6 +22,7 @@ const UserList = styled.div`
     padding: 16px;
     align-items: center;
     overflow-y: auto;
+    gap: 4px;
 `
 
 const UserCard = styled(Link)`
@@ -51,7 +52,6 @@ const Avatar = styled.img`
 const UserInfo = styled.div`
     display: flex;
     height: 60px;
-    align-self: center;
     box-sizing: border-box;
     padding: 7px 0 7px 0;
     flex-direction: column;
@@ -165,7 +165,6 @@ const SkeletonAvatar = styled.div`
 const SkeletonInfo = styled.div`
     display: flex;
     height: 60px;
-    align-self: center;
     box-sizing: border-box;
     padding: 7px 0 7px 0;
     flex-direction: column;
@@ -211,6 +210,9 @@ const HomePage: React.FC = () => {
         return () => {
             window.removeEventListener("resize", calculateSkeletons)
         }
+    }, [])
+    useEffect(() => {
+        document.title = "Главная"
     }, [])
 
     if (loading) {

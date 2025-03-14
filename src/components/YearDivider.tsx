@@ -16,7 +16,7 @@ const YearDividerContainer = styled.div`
 
 const Line = styled.div`
     flex: 1;
-    height: 2px;
+    height: 1px;
     background-color: #c3c3c6;
     border-radius: 15px;
 `

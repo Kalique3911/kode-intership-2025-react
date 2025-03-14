@@ -2,11 +2,12 @@ import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../store/store"
 import styled from "styled-components"
-import { fetchUsers, getAge, getFullfDisplayedBirthday, transFormPhoneNumber } from "../store/slices/usersSlice"
+import { getAge, getFullfDisplayedBirthday, transFormPhoneNumber } from "../utils/usersUtils"
 import { Link, useParams } from "react-router-dom"
 import backIcon from "../assets/BackIcon.svg"
 import phoneIcon from "../assets/PhoneIcon.svg"
 import birthIcon from "../assets/BirthIcon.svg"
+import { fetchUsers } from "../store/slices/usersSlice"
 
 const Container = styled.div`
     display: flex;
@@ -78,15 +79,15 @@ const UserDetails = styled.div`
     padding: 0 16px 0 16px;
 `
 
-const DetailItem = styled.div<{ $second: boolean }>`
+const DetailItem = styled.div<{ $isSecond: boolean }>`
     display: grid;
-    grid-template-columns: ${({ $second }) => ($second ? "auto 1fr" : "auto 1fr auto")};
+    grid-template-columns: ${({ $isSecond }) => ($isSecond ? "auto 1fr" : "auto 1fr auto")};
     width: 100%;
     height: 60px;
     font-size: 16px;
     font-weight: 500;
     align-items: center;
-    border-top: ${({ $second }) => ($second ? "0.5px solid #f7f7f8" : "")};
+    border-top: ${({ $isSecond }) => ($isSecond ? "0.5px solid #f7f7f8" : "")};
 `
 
 const DetailIconWrapper = styled.div`
@@ -108,18 +109,43 @@ const PhoneLink = styled.a`
     color: black;
 `
 
+const SkeletonAvatar = styled.div`
+    margin: 72px 0 24px 0;
+    width: 104px;
+    height: 104px;
+    border-radius: 64px;
+`
+
 const UserDetailsPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>()
     const { id } = useParams<{ id: string }>()
-    const { displayedUsers } = useSelector((state: RootState) => state.users)
+    const { displayedUsers, loading } = useSelector((state: RootState) => state.users)
     const user = displayedUsers?.find((u) => u.id === id)
 
     useEffect(() => {
         if (!displayedUsers) dispatch(fetchUsers({}))
     }, [dispatch, displayedUsers])
+    useEffect(() => {
+        if (user) {
+            document.title = user.firstName
+        }
+    }, [user])
 
-    if (!user) {
+    if (loading) {
         return <></>
+    }
+    if (!user) {
+        return (
+            <Container>
+                <UserCard>
+                    <BackButton to={"/"}>
+                        <BackIcon src={backIcon} />
+                    </BackButton>
+                    <SkeletonAvatar />
+                    <UserName>Пользователь не найден</UserName>
+                </UserCard>
+            </Container>
+        )
     }
 
     return (
@@ -137,14 +163,14 @@ const UserDetailsPage: React.FC = () => {
             </UserCard>
 
             <UserDetails>
-                <DetailItem $second={false}>
+                <DetailItem $isSecond={false}>
                     <DetailIconWrapper>
                         <DetailIcon src={birthIcon} />
                     </DetailIconWrapper>
                     {getFullfDisplayedBirthday(user.birthday)}
                     <Age>{getAge(user.birthday)}</Age>
                 </DetailItem>
-                <DetailItem $second={true}>
+                <DetailItem $isSecond={true}>
                     <DetailIconWrapper>
                         <DetailIcon src={phoneIcon} />
                     </DetailIconWrapper>
