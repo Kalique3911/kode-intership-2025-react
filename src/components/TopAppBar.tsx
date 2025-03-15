@@ -3,8 +3,7 @@ import styled from "styled-components"
 import { useDebounce } from "../hooks/useDebounce"
 import { useDispatch, useSelector } from "react-redux"
 import { AppDispatch, RootState } from "../store/store"
-import { fetchUsers, inputFilter, sortByAlphabet, sortByBirthday } from "../store/slices/usersSlice"
-import { Department } from "../types"
+import { fetchUsers, inputFilter, setSearchQuery, setSelectedDepartment, sortByAlphabet, sortByBirthday } from "../store/slices/usersSlice"
 import Modal from "./Modal"
 import searchIcon from "./../assets/SearchIcon.svg"
 import focusedSearchIcon from "./../assets/FocusedSearchIcon.svg"
@@ -35,8 +34,8 @@ const SearchContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean }>`
     background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
 `
 
-const SearchWrapper = styled.div`
-    display: flex;
+const SearchWrapper = styled.div<{ $visible: boolean }>`
+    display: ${({ $visible }) => ($visible ? "flex" : "none")};
     height: 40px;
     padding: 8px 12px 8px 12px;
     box-sizing: border-box;
@@ -148,15 +147,13 @@ const ModalCheckBox = styled.input.attrs({ type: "checkbox" })`
 
 const TopAppBar = () => {
     const dispatch = useDispatch<AppDispatch>()
-    const [searchValue, setSearchValue] = useState("")
     const [inputFocus, setInputFocus] = useState(false)
     const [modal, setModal] = useState(false)
-    const [selectedDepartment, setSelectedDepartment] = useState<Department | undefined>()
-    const { sorting, loading } = useSelector((state: RootState) => state.users)
+    const { sorting, loading, searchQuery, selectedDepartment } = useSelector((state: RootState) => state.users)
     const [networkIssues, setNetworkIssues] = useState(false)
     const isOnline = useNetworkStatus()
 
-    const debouncedSearchQuery = useDebounce(searchValue, 400)
+    const debouncedSearchQuery = useDebounce(searchQuery, 400)
 
     useEffect(() => {
         if (selectedDepartment) {
@@ -164,10 +161,18 @@ const TopAppBar = () => {
         } else {
             dispatch(fetchUsers({}))
         }
+        const input = document.getElementById("searchInput") as HTMLInputElement
+        if (input && searchQuery) {
+            input.value = searchQuery
+        }
     }, [dispatch, selectedDepartment])
 
     useEffect(() => {
-        dispatch(inputFilter(debouncedSearchQuery))
+        if (!debouncedSearchQuery) {
+            dispatch(inputFilter(""))
+        } else {
+            dispatch(inputFilter(debouncedSearchQuery))
+        }
     }, [debouncedSearchQuery, dispatch])
 
     useEffect(() => {
@@ -181,17 +186,19 @@ const TopAppBar = () => {
                 dispatch(fetchUsers({})).finally(() => setNetworkIssues(false))
             }
         }
-    }, [isOnline, dispatch, selectedDepartment])
+    }, [isOnline, dispatch])
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchValue(event.target.value)
+        dispatch(setSearchQuery(event.currentTarget.value))
     }
     const handleDepartmentChange = (event: React.MouseEvent<HTMLDivElement>) => {
         if (isOnline) {
-            const item = event.target as HTMLDivElement
-            setSelectedDepartment(reverseTransformDepartment(item.innerHTML))
+            const item = event.currentTarget as HTMLDivElement
+            dispatch(setSelectedDepartment(reverseTransformDepartment(item.innerHTML)))
             const input = document.getElementById("searchInput") as HTMLInputElement
-            if (input) input.value = ""
+            if (input && searchQuery) {
+                input.value = searchQuery
+            }
         }
     }
     const filterClickHandler = () => {
@@ -226,19 +233,17 @@ const TopAppBar = () => {
                     </NetworkStatusElement>
                 )}
 
-                {!(networkIssues && loading) && isOnline && (
-                    <SearchWrapper>
-                        <SearchIconWrapper>
-                            <InputIcon src={searchIcon} $visible={!inputFocus} />
-                            <InputIcon src={focusedSearchIcon} $visible={inputFocus} />
-                        </SearchIconWrapper>
-                        <SearchInput id="searchInput" onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
-                        <ModalButtonWrapper onClick={filterClickHandler}>
-                            <InputIcon src={modalIcon} $visible={sorting === "alphabet"} />
-                            <InputIcon src={birthdayModalIcon} $visible={sorting === "birthday"} />
-                        </ModalButtonWrapper>
-                    </SearchWrapper>
-                )}
+                <SearchWrapper $visible={!(networkIssues && loading) && isOnline}>
+                    <SearchIconWrapper>
+                        <InputIcon src={searchIcon} $visible={!inputFocus} />
+                        <InputIcon src={focusedSearchIcon} $visible={inputFocus} />
+                    </SearchIconWrapper>
+                    <SearchInput id="searchInput" onChange={handleInputChange} placeholder={"Введите имя, тег..."} onFocus={() => setInputFocus(true)} onBlur={() => setInputFocus(false)} />
+                    <ModalButtonWrapper onClick={filterClickHandler}>
+                        <InputIcon src={modalIcon} $visible={sorting === "alphabet"} />
+                        <InputIcon src={birthdayModalIcon} $visible={sorting === "birthday"} />
+                    </ModalButtonWrapper>
+                </SearchWrapper>
             </SearchContainer>
 
             <Tabs>
@@ -246,7 +251,7 @@ const TopAppBar = () => {
                     Все
                 </TabItem>
                 {displayedDepartments.map((department) => (
-                    <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === department}>
+                    <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === department} key={department}>
                         {department}
                     </TabItem>
                 ))}

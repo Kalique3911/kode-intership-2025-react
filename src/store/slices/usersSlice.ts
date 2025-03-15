@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
 import { fetchAllUsers, fetchUsersByDepartment, fetchDynamicUsers, fetchError500 } from "../../api"
-import { QueryParams, Users, DisplayedUser, User } from "../../types"
+import { QueryParams, Users, DisplayedUser, User, Department } from "../../types"
 import { transformDepartment } from "../../utils/usersUtils"
 
 export const fetchUsers = createAsyncThunk("users/fetchUsers", async (params: QueryParams): Promise<Users> => {
@@ -63,6 +63,8 @@ const initialState = {
     sorting: "alphabet" as "alphabet" | "birthday",
     loading: false,
     error: null as string | null,
+    searchQuery: null as string | null,
+    selectedDepartment: undefined as Department | undefined,
 }
 
 const usersSlice = createSlice({
@@ -93,6 +95,12 @@ const usersSlice = createSlice({
                 state.displayedUsers = sortByBirthdayLogic(state.displayedUsers)
             }
         },
+        setSearchQuery(state, action) {
+            state.searchQuery = action.payload
+        },
+        setSelectedDepartment(state, action) {
+            state.selectedDepartment = action.payload
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -101,18 +109,25 @@ const usersSlice = createSlice({
                 state.error = null
             })
             .addCase(fetchUsers.fulfilled, (state, action) => {
-                state.loading = false
                 state.users = action.payload.items.map((user: User) => ({
                     ...user,
                     department: transformDepartment(user.department),
                     firstNextYear: false,
                 }))
-                state.displayedUsers = state.users
+                if (state.searchQuery) {
+                    state.displayedUsers = state.users.filter(
+                        (user: DisplayedUser) => (user.firstName + " " + user.lastName).toLowerCase().includes(state.searchQuery!.toLowerCase()) || user.userTag.toLowerCase().includes(state.searchQuery!.toLowerCase())
+                    )
+                } else {
+                    state.displayedUsers = state.users
+                }
+
                 if (state.sorting === "alphabet") {
                     state.displayedUsers.sort((a, b) => a.firstName.localeCompare(b.firstName))
                 } else {
                     state.displayedUsers = sortByBirthdayLogic(state.displayedUsers)
                 }
+                state.loading = false
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.loading = false
@@ -125,6 +140,6 @@ const usersSlice = createSlice({
     },
 })
 
-export const { inputFilter, sortByAlphabet, sortByBirthday } = usersSlice.actions
+export const { inputFilter, sortByAlphabet, sortByBirthday, setSearchQuery, setSelectedDepartment } = usersSlice.actions
 
 export default usersSlice.reducer
