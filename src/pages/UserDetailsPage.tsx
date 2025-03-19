@@ -6,18 +6,22 @@ import { getAge, getFullfDisplayedBirthday, transFormPhoneNumber } from "../util
 import { Link, useParams } from "react-router-dom"
 import backIcon from "../assets/BackIcon.svg"
 import phoneIcon from "../assets/PhoneIcon.svg"
+import darkBirthIcon from "../assets/DarkBirthIcon.svg"
+import darkPhoneIcon from "../assets/DarkPhoneIcon.svg"
 import birthIcon from "../assets/BirthIcon.svg"
 import { fetchUsers } from "../store/slices/usersSlice"
+import { ThemeState } from "../store/slices/themeSlice"
 
-const Container = styled.div`
+const Container = styled.div<{ $mainBackground: ThemeState["mainBackground"] }>`
     display: flex;
     flex-direction: column;
+    background-color: ${({ $mainBackground }) => $mainBackground};
     gap: 8px;
     height: 100vh;
 `
 
-const UserCard = styled.div`
-    background-color: #f7f7f8;
+const UserCard = styled.div<{ $auxiliaryBackgtound: ThemeState["auxiliaryBackground"] }>`
+    background-color: ${({ $auxiliaryBackgtound }) => $auxiliaryBackgtound};
     display: flex;
     height: 280px;
     flex-direction: column;
@@ -50,8 +54,9 @@ const Avatar = styled.img`
     border-radius: 64px;
 `
 
-const UserName = styled.h2`
+const UserName = styled.h2<{ $mainFont: ThemeState["mainFont"] }>`
     font-size: 24px;
+    color: ${({ $mainFont }) => $mainFont};
     margin: 0 0 12px 0;
     font-weight: 700;
     display: flex;
@@ -59,15 +64,15 @@ const UserName = styled.h2`
     gap: 4px;
 `
 
-const UserTag = styled.span`
+const UserTag = styled.span<{ $minorFont: ThemeState["minorFont"] }>`
     font-size: 17px;
-    color: #97979f;
+    color: ${({ $minorFont }) => $minorFont};
     font-weight: 400;
 `
 
-const UserDepartment = styled.div`
+const UserDepartment = styled.div<{ $auxiliaryFont: ThemeState["auxiliaryFont"] }>`
     font-size: 13px;
-    color: #55555c;
+    color: ${({ $auxiliaryFont }) => $auxiliaryFont};
     font-weight: 400;
 `
 
@@ -79,9 +84,10 @@ const UserDetails = styled.div`
     padding: 0 16px 0 16px;
 `
 
-const DetailItem = styled.div<{ $isSecond: boolean }>`
+const DetailItem = styled.div<{ $isSecond: boolean; $mainFont: ThemeState["mainFont"] }>`
     display: grid;
     grid-template-columns: ${({ $isSecond }) => ($isSecond ? "auto 1fr" : "auto 1fr auto")};
+    color: ${({ $mainFont }) => $mainFont};
     width: 100%;
     height: 60px;
     font-size: 16px;
@@ -96,17 +102,19 @@ const DetailIconWrapper = styled.div`
     margin-right: 12px;
 `
 
-const DetailIcon = styled.img``
+const DetailIcon = styled.img<{ $visible: boolean }>`
+    display: ${({ $visible }) => ($visible ? "" : "none")};
+`
 
-const Age = styled.div`
+const Age = styled.div<{ $minorFont: ThemeState["minorFont"] }>`
     margin-right: 4px;
     font-size: 16px;
-    color: #97979b;
+    color: ${({ $minorFont }) => $minorFont};
     font-weight: 500;
 `
-const PhoneLink = styled.a`
+const PhoneLink = styled.a<{ $mainFont: ThemeState["mainFont"] }>`
     text-decoration: none;
-    color: black;
+    color: ${({ $mainFont }) => $mainFont};
 `
 
 const SkeletonAvatar = styled.div`
@@ -120,6 +128,7 @@ const UserDetailsPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>()
     const { id } = useParams<{ id: string }>()
     const { displayedUsers, loading } = useSelector((state: RootState) => state.users)
+    const { theme, mainBackground, auxiliaryBackground, auxiliaryFont, minorFont, mainFont } = useSelector((state: RootState) => state.theme)
     const user = displayedUsers?.find((u) => u.id === id)
 
     useEffect(() => {
@@ -136,45 +145,49 @@ const UserDetailsPage: React.FC = () => {
     }
     if (!user) {
         return (
-            <Container>
-                <UserCard>
+            <Container $mainBackground={mainBackground}>
+                <UserCard $auxiliaryBackgtound={auxiliaryBackground}>
                     <BackButton to={"/"}>
                         <BackIcon src={backIcon} />
                     </BackButton>
                     <SkeletonAvatar />
-                    <UserName>Пользователь не найден</UserName>
+                    <UserName $mainFont={mainFont}>Пользователь не найден</UserName>
                 </UserCard>
             </Container>
         )
     }
 
     return (
-        <Container>
-            <UserCard>
+        <Container $mainBackground={mainBackground}>
+            <UserCard $auxiliaryBackgtound={auxiliaryBackground}>
                 <BackButton to={"/"}>
                     <BackIcon src={backIcon} />
                 </BackButton>
                 <Avatar src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
-                <UserName>
+                <UserName $mainFont={mainFont}>
                     {`${user.firstName} ${user.lastName}`}
-                    <UserTag>{user.userTag}</UserTag>
+                    <UserTag $minorFont={minorFont}>{user.userTag}</UserTag>
                 </UserName>
-                <UserDepartment>{user.department}</UserDepartment>
+                <UserDepartment $auxiliaryFont={auxiliaryFont}>{user.department}</UserDepartment>
             </UserCard>
 
             <UserDetails>
-                <DetailItem $isSecond={false}>
+                <DetailItem $isSecond={false} $mainFont={mainFont}>
                     <DetailIconWrapper>
-                        <DetailIcon src={birthIcon} />
+                        <DetailIcon src={birthIcon} $visible={theme === "light"} />
+                        <DetailIcon src={darkBirthIcon} $visible={theme === "dark"} />
                     </DetailIconWrapper>
                     {getFullfDisplayedBirthday(user.birthday)}
-                    <Age>{getAge(user.birthday)}</Age>
+                    <Age $minorFont={minorFont}>{getAge(user.birthday)}</Age>
                 </DetailItem>
-                <DetailItem $isSecond={true}>
+                <DetailItem $isSecond={true} $mainFont={mainFont}>
                     <DetailIconWrapper>
-                        <DetailIcon src={phoneIcon} />
+                        <DetailIcon src={phoneIcon} $visible={theme === "light"} />
+                        <DetailIcon src={darkPhoneIcon} $visible={theme === "dark"} />
                     </DetailIconWrapper>
-                    <PhoneLink href={`tel:${user.phone}`}>{transFormPhoneNumber(user.phone)}</PhoneLink>
+                    <PhoneLink href={`tel:${user.phone}`} $mainFont={mainFont}>
+                        {transFormPhoneNumber(user.phone)}
+                    </PhoneLink>
                 </DetailItem>
             </UserDetails>
         </Container>

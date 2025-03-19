@@ -1,6 +1,9 @@
 import React from "react"
 import styled from "styled-components"
 import exitIcon from "../assets/ExitIcon.svg"
+import { useSelector } from "react-redux"
+import { RootState } from "../store/store"
+import { ThemeState } from "../store/slices/themeSlice"
 
 interface ModalProps {
     isOpen: boolean
@@ -21,7 +24,7 @@ const Overlay = styled.div<{ $isOpen: boolean }>`
     transition: opacity 0.1s ease, visibility 0.1s ease;
 `
 
-const ModalWrapper = styled.div<{ $isOpen: boolean }>`
+const ModalWrapper = styled.div<{ $isOpen: boolean; $mainBackground: ThemeState["mainBackground"] }>`
     width: 373px;
     height: 192px;
     position: fixed;
@@ -37,25 +40,27 @@ const ModalWrapper = styled.div<{ $isOpen: boolean }>`
     box-sizing: border-box;
     border-radius: 20px;
     z-index: 1001;
+    background: ${({ $mainBackground }) => $mainBackground};
     opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
     visibility: ${({ $isOpen }) => ($isOpen ? "visible" : "hidden")};
     transition: opacity 0.1s ease, transform 0.1s ease, visibility 0.1s ease;
 `
 
-const ModalTitle = styled.h2`
+const ModalTitle = styled.h2<{ $mainFont: ThemeState["mainFont"] }>`
     justify-self: center;
     margin: 0;
+    color: ${({ $mainFont }) => $mainFont};
     font-size: 20px;
     font-weight: 600;
 `
 
-const ModalCloseButton = styled.button`
+const ModalCloseButton = styled.button<{ $auxiliaryBackground: ThemeState["auxiliaryBackground"] }>`
     grid-column: 2;
     grid-row: 1;
     border: 0;
     height: 24px;
     width: 24px;
-    background: #f7f7f8;
+    background: ${({ $auxiliaryBackground }) => $auxiliaryBackground};
     border-radius: 50%;
     cursor: pointer;
 `
@@ -68,12 +73,13 @@ const ModalInputs = styled.div`
 `
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+    const { mainFont, mainBackground, auxiliaryBackground } = useSelector((state: RootState) => state.theme)
     return (
         <>
             <Overlay $isOpen={isOpen} onClick={onClose} />
-            <ModalWrapper $isOpen={isOpen}>
-                <ModalTitle>Сортировка</ModalTitle>
-                <ModalCloseButton onClick={onClose}>
+            <ModalWrapper $isOpen={isOpen} $mainBackground={mainBackground}>
+                <ModalTitle $mainFont={mainFont}>Сортировка</ModalTitle>
+                <ModalCloseButton onClick={onClose} $auxiliaryBackground={auxiliaryBackground}>
                     <ModalExitIcon src={exitIcon} />
                 </ModalCloseButton>
                 <ModalInputs>{children}</ModalInputs>

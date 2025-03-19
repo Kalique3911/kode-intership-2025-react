@@ -9,11 +9,14 @@ import { getBriefDisplayedBirthday } from "../utils/usersUtils"
 import nothingFoundIcon from "../assets/NothingFoundIcon.png"
 import errorIcon from "../assets/ErrorIcon.png"
 import useNetworkStatus from "../hooks/useNetworkStatus"
+import { ThemeState } from "../store/slices/themeSlice"
 
-const Container = styled.div`
+const Container = styled.div<{ $mainBackground: ThemeState["mainBackground"] }>`
     height: 100vh;
     display: flex;
     flex-direction: column;
+    background: ${({ $mainBackground }) => $mainBackground};
+    transition: color 0.3s ease, background 0.3s ease;
 `
 
 const UserList = styled.div`
@@ -26,7 +29,7 @@ const UserList = styled.div`
     gap: 4px;
 `
 
-const UserCard = styled(Link)`
+const UserCard = styled(Link)<{ $theme: ThemeState["theme"] }>`
     display: flex;
     align-items: center;
     height: 80px;
@@ -36,9 +39,10 @@ const UserCard = styled(Link)`
     color: black;
     width: 100%;
     box-sizing: border-box;
+    transition: color 0.3s ease, background 0.3s ease;
 
     &:hover {
-        background-color: #f5f5f5;
+        background-color: ${({ $theme }) => ($theme === "light" ? "#f5f5f5" : "rgb(80, 80, 80)")};
     }
 `
 
@@ -59,41 +63,45 @@ const UserInfo = styled.div`
     position: relative;
 `
 
-const UserName = styled.div`
+const UserName = styled.div<{ $mainFont: ThemeState["mainFont"] }>`
     height: 20px;
     display: flex;
     align-items: center;
+    color: ${({ $mainFont }) => $mainFont};
     gap: 4px;
     font-size: 16px;
     font-weight: 500;
+    transition: color 0.3s ease, background 0.3s ease;
 `
 
-const UserTag = styled.div`
+const UserTag = styled.div<{ $minorFont: ThemeState["minorFont"] }>`
     height: 18px;
     padding-top: 1px;
     box-sizing: border-box;
     display: flex;
     align-self: center;
     font-size: 14px;
-    color: #97979b;
+    color: ${({ $minorFont }) => $minorFont};
     font-weight: 500;
+    transition: color 0.3s ease, background 0.3s ease;
 `
 
-const UserDepartment = styled.div`
+const UserDepartment = styled.div<{ $auxiliaryFont: ThemeState["auxiliaryFont"] }>`
     margin-top: 3px;
     font-size: 13px;
-    color: #55555c;
+    color: ${({ $auxiliaryFont }) => $auxiliaryFont};
     font-weight: 400;
 `
 
-const UserBirthday = styled.div<{ $sorting: "alphabet" | "birthday" }>`
+const UserBirthday = styled.div<{ $sorting: "alphabet" | "birthday"; $auxiliaryFont: ThemeState["auxiliaryFont"] }>`
     font-size: 14px;
-    color: #55555c;
+    color: ${({ $auxiliaryFont }) => $auxiliaryFont};
     height: 20px;
     margin: 28px 4px 32px auto;
     font-size: 15px;
     font-weight: 400;
     display: ${({ $sorting }) => ($sorting === "alphabet" ? "none" : "block")};
+    transition: color 0.3s ease, background 0.3s ease;
 `
 
 const ErrorContainer = styled.div`
@@ -115,19 +123,21 @@ const ErrorIcon = styled.img`
     width: 56px;
 `
 
-const ErrorTitle = styled.h2`
+const ErrorTitle = styled.h2<{ $mainFont: ThemeState["mainFont"] }>`
     margin: 0;
     text-align: center;
     font-size: 17px;
     font-weight: 600;
-    color: #050510;
+    color: ${({ $mainFont }) => $mainFont};
+    transition: color 0.3s ease, background 0.3s ease;
 `
 
-const ErrorText = styled.div`
+const ErrorText = styled.div<{ $minorFont: ThemeState["minorFont"] }>`
     text-align: center;
     font-size: 16px;
     font-weight: 400;
-    color: #97979b;
+    color: ${({ $minorFont }) => $minorFont};
+    transition: color 0.3s ease, background 0.3s ease;
 `
 
 const ErrorRetry = styled.div`
@@ -154,13 +164,13 @@ const Skeleton = styled.div`
     box-sizing: border-box;
 `
 
-const SkeletonAvatar = styled.div`
+const SkeletonAvatar = styled.div<{ $theme: ThemeState["theme"] }>`
     width: 72px;
     height: 72px;
     margin: 6px 16px 6px 0;
     border-radius: 50%;
     margin-right: 16px;
-    background: linear-gradient(to right, #f3f3f6, #fafafa);
+    background: linear-gradient(to right, ${({ $theme }) => ($theme === "light" ? "#f3f3f6, #fafafa" : "#2C2C2C, #1E1E1E")});
 `
 
 const SkeletonInfo = styled.div`
@@ -172,7 +182,7 @@ const SkeletonInfo = styled.div`
     position: relative;
 `
 
-const SkeletonName = styled.div`
+const SkeletonName = styled.div<{ $theme: ThemeState["theme"] }>`
     height: 20px;
     display: flex;
     align-items: center;
@@ -180,18 +190,19 @@ const SkeletonName = styled.div`
     height: 16px;
     width: 144px;
     border-radius: 50px;
-    background: linear-gradient(to right, #f3f3f6, #fafafa);
+    background: linear-gradient(to right, ${({ $theme }) => ($theme === "light" ? "#f3f3f6, #fafafa" : "#2C2C2C, #1E1E1E")});
 `
 
-const SkeletonDepartment = styled.div`
+const SkeletonDepartment = styled.div<{ $theme: ThemeState["theme"] }>`
     margin-top: 3px;
     height: 12px;
     width: 80px;
     border-radius: 50px;
-    background: linear-gradient(to right, #f3f3f6, #fafafa);
+    background: linear-gradient(to right, ${({ $theme }) => ($theme === "light" ? "#f3f3f6, #fafafa" : "#2C2C2C, #1E1E1E")});
 `
 
 const HomePage: React.FC = () => {
+    const { theme, mainFont, auxiliaryFont, minorFont, mainBackground } = useSelector((state: RootState) => state.theme)
     const { displayedUsers, sorting, loading, error } = useSelector((state: RootState) => state.users)
     const [skeletonCount, setSkeletonCount] = useState(0)
     const isOnline = useNetworkStatus()
@@ -219,16 +230,16 @@ const HomePage: React.FC = () => {
 
     if (loading) {
         return (
-            <Container>
+            <Container $mainBackground={mainBackground}>
                 <TopAppBar />
                 <UserList>
                     {Array.from({ length: skeletonCount }).map((_, index) => (
                         <React.Fragment key={index}>
                             <Skeleton>
-                                <SkeletonAvatar />
+                                <SkeletonAvatar $theme={theme} />
                                 <SkeletonInfo>
-                                    <SkeletonName />
-                                    <SkeletonDepartment />
+                                    <SkeletonName $theme={theme} />
+                                    <SkeletonDepartment $theme={theme} />
                                 </SkeletonInfo>
                             </Skeleton>
                         </React.Fragment>
@@ -240,12 +251,12 @@ const HomePage: React.FC = () => {
 
     if (error && isOnline) {
         return (
-            <Container>
+            <Container $mainBackground={mainBackground}>
                 <TopAppBar />
                 <ErrorContainer>
                     <ErrorIcon src={errorIcon} />
-                    <ErrorTitle>Какой-то сверхразум всё сломал</ErrorTitle>
-                    <ErrorText>Постараемся быстро починить</ErrorText>
+                    <ErrorTitle $mainFont={mainFont}>Какой-то сверхразум всё сломал</ErrorTitle>
+                    <ErrorText $minorFont={minorFont}>Постараемся быстро починить</ErrorText>
                     <ErrorRetry onClick={() => window.location.reload()}>Попробовать снова</ErrorRetry>
                 </ErrorContainer>
             </Container>
@@ -253,7 +264,7 @@ const HomePage: React.FC = () => {
     }
 
     return (
-        <Container>
+        <Container $mainBackground={mainBackground}>
             <TopAppBar />
 
             {displayedUsers?.length !== 0 ? (
@@ -261,17 +272,19 @@ const HomePage: React.FC = () => {
                     {displayedUsers?.map((user) => (
                         <React.Fragment key={user.id}>
                             {user.firstNextYear && <YearDivider text={new Date().getFullYear().toString()} />}
-                            <UserCard to={`/${user.id}`}>
+                            <UserCard to={`/${user.id}`} $theme={theme}>
                                 <Avatar src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} />
                                 <UserInfo>
-                                    <UserName>
+                                    <UserName $mainFont={mainFont}>
                                         {`${user.firstName} ${user.lastName}`}
-                                        <UserTag>{user.userTag}</UserTag>
+                                        <UserTag $minorFont={minorFont}>{user.userTag}</UserTag>
                                     </UserName>
 
-                                    <UserDepartment>{user.department}</UserDepartment>
+                                    <UserDepartment $auxiliaryFont={auxiliaryFont}>{user.department}</UserDepartment>
                                 </UserInfo>
-                                <UserBirthday $sorting={sorting}>{getBriefDisplayedBirthday(user.birthday)}</UserBirthday>
+                                <UserBirthday $sorting={sorting} $auxiliaryFont={auxiliaryFont}>
+                                    {getBriefDisplayedBirthday(user.birthday)}
+                                </UserBirthday>
                             </UserCard>
                         </React.Fragment>
                     ))}
@@ -279,8 +292,8 @@ const HomePage: React.FC = () => {
             ) : (
                 <ErrorContainer>
                     <ErrorIcon src={nothingFoundIcon} />
-                    <ErrorTitle>Мы ничего не нашли</ErrorTitle>
-                    <ErrorText>Попробуй скорректировать запрос</ErrorText>
+                    <ErrorTitle $mainFont={mainFont}>Мы ничего не нашли</ErrorTitle>
+                    <ErrorText $minorFont={minorFont}>Попробуй скорректировать запрос</ErrorText>
                 </ErrorContainer>
             )}
         </Container>
