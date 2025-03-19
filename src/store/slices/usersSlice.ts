@@ -3,7 +3,43 @@ import { fetchAllUsers, fetchUsersByDepartment, fetchDynamicUsers, fetchError500
 import { QueryParams, Users, DisplayedUser, User, Department } from "../../types"
 import { transformDepartment } from "../../utils/usersUtils"
 
-export const fetchUsers = createAsyncThunk("users/fetchUsers", async (params: QueryParams): Promise<Users> => {
+type CacheEntry = {
+    data: User[]
+    timestamp: number
+}
+
+interface UsersState {
+    users: null | DisplayedUser[]
+    displayedUsers: null | DisplayedUser[]
+    sorting: "alphabet" | "birthday"
+    loading: boolean
+    error: string | null
+    searchQuery: string | null
+    selectedDepartment: Department | undefined
+    cache: Record<string, CacheEntry>
+}
+
+const initialState: UsersState = {
+    users: null,
+    displayedUsers: null,
+    sorting: "alphabet",
+    loading: false,
+    error: null,
+    searchQuery: null,
+    selectedDepartment: undefined,
+    cache: {},
+}
+
+const CACHE_DURATION = 5 * 60 * 1000
+
+export const fetchUsers = createAsyncThunk("users/fetchUsers", async (params: QueryParams, { getState }): Promise<Users> => {
+    const state = getState() as { users: UsersState }
+    const cacheKey = params.__example || "all"
+
+    if (state.users.cache && state.users.cache[cacheKey] && Date.now() - state.users.cache[cacheKey].timestamp < CACHE_DURATION) {
+        return { items: state.users.cache[cacheKey].data }
+    }
+
     let response
     if (params.__example) {
         response = await fetchUsersByDepartment(params.__example)
@@ -57,16 +93,6 @@ const sortByBirthdayLogic = (displayedUsers: DisplayedUser[]) => {
     return [...currentYearUsers, ...nextYearUsers]
 }
 
-const initialState = {
-    users: null as null | DisplayedUser[],
-    displayedUsers: null as null | DisplayedUser[],
-    sorting: "alphabet" as "alphabet" | "birthday",
-    loading: false,
-    error: null as string | null,
-    searchQuery: null as string | null,
-    selectedDepartment: undefined as Department | undefined,
-}
-
 const usersSlice = createSlice({
     name: "users",
     initialState,
@@ -109,11 +135,14 @@ const usersSlice = createSlice({
                 state.error = null
             })
             .addCase(fetchUsers.fulfilled, (state, action) => {
+                const cacheKey = state.selectedDepartment || "all"
+                state.cache[cacheKey] = { data: action.payload.items, timestamp: Date.now() }
                 state.users = action.payload.items.map((user: User) => ({
                     ...user,
                     department: transformDepartment(user.department),
                     firstNextYear: false,
                 }))
+
                 if (state.searchQuery) {
                     state.displayedUsers = state.users.filter(
                         (user: DisplayedUser) => (user.firstName + " " + user.lastName).toLowerCase().includes(state.searchQuery!.toLowerCase()) || user.userTag.toLowerCase().includes(state.searchQuery!.toLowerCase())
