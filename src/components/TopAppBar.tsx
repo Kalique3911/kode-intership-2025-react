@@ -16,9 +16,7 @@ import useNetworkStatus from "../hooks/useNetworkStatus"
 import { ThemeState, toggleTheme } from "../store/slices/themeSlice"
 import { useTranslation } from "react-i18next"
 
-const Container = styled.div`
-    overflow-x: hidden;
-`
+const Container = styled.div``
 
 const TitleContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean; $mainFont: ThemeState["mainFont"] }>`
     padding: 0 32px 0 32px;
