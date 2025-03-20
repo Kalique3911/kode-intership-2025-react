@@ -16,7 +16,9 @@ import useNetworkStatus from "../hooks/useNetworkStatus"
 import { ThemeState, toggleTheme } from "../store/slices/themeSlice"
 import { useTranslation } from "react-i18next"
 
-const Container = styled.div``
+const Container = styled.div`
+    overflow-x: hidden;
+`
 
 const TitleContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean; $mainFont: ThemeState["mainFont"] }>`
     padding: 0 32px 0 32px;
@@ -55,6 +57,8 @@ const LanguageBlock = styled.button<{ $mainFont: ThemeState["mainFont"] }>`
     background: none;
     border: 0px;
     cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
     color: ${({ $mainFont }) => $mainFont};
 `
 
@@ -84,6 +88,7 @@ const SearchWrapper = styled.div<{ $visible: boolean; $auxiliaryBackground: Them
     border-radius: 16px;
     background: ${({ $auxiliaryBackground }) => $auxiliaryBackground};
     align-content: center;
+    align-items: center;
     transition: color 0.3s ease, background 0.3s ease;
 `
 
@@ -112,6 +117,7 @@ const SearchIconWrapper = styled.div`
     align-content: center;
     justify-content: center;
     position: relative;
+    vertical-align: middle;
 `
 
 const InputIcon = styled.img<{ $visible: boolean }>`
@@ -132,6 +138,7 @@ const ModalButtonWrapper = styled.div`
     cursor: pointer;
     margin-left: auto;
     position: relative;
+    vertical-align: middle;
 `
 
 const NetworkStatusElement = styled.div<{ $isOnline: boolean; $isLoading: boolean }>`
