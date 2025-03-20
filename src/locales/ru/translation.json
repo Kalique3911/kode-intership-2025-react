@@ -1,0 +1,42 @@
+{
+    "home": {
+        "title": "Главная",
+        "error": "Какой-то сверхразум всё сломал",
+        "promise": "Постараемся быстро починить",
+        "retry": "Попробовать снова",
+        "nothingFound": "Мы ничего не нашли",
+        "adjustQuery": "Попробуйте скорректировать запрос"
+    },
+    "search": {
+        "title": "Поиск",
+        "placeholder": "Введите имя, тег...",
+        "all": "Все"
+    },
+    "common": {
+        "android": "Android",
+        "ios": "iOS",
+        "design": "Дизайн",
+        "management": "Менеджмент",
+        "qa": "QA",
+        "back_office": "Бэк-офис",
+        "frontend": "Фронтенд",
+        "hr": "HR",
+        "pr": "PR",
+        "backend": "Бэкенд",
+        "support": "Поддержка",
+        "analytics": "Аналитика"
+    },
+    "userDetails": {
+        "userNotFound": "Пользователь не найден",
+        "birthday": "День рождения"
+    },
+    "modal": {
+        "sortTitle": "Сортировка",
+        "sortAlphabet": "По алфавиту",
+        "sortBirthday": "По дню рождения"
+    },
+    "network": {
+        "noInternet": "Не могу обновить данные. Проверь соединение с интернетом.",
+        "loading": "Секундочку, гружусь..."
+    }
+}

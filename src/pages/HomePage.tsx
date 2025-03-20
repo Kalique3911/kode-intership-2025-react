@@ -10,6 +10,7 @@ import nothingFoundIcon from "../assets/NothingFoundIcon.png"
 import errorIcon from "../assets/ErrorIcon.png"
 import useNetworkStatus from "../hooks/useNetworkStatus"
 import { ThemeState } from "../store/slices/themeSlice"
+import { useTranslation } from "react-i18next"
 
 const Container = styled.div<{ $mainBackground: ThemeState["mainBackground"] }>`
     height: 100vh;
@@ -112,6 +113,7 @@ const ErrorContainer = styled.div`
     transform: translate(-50%, -50%);
     flex-direction: column;
     align-items: center;
+    gap: 12px;
 
     @media (max-height: 400px) {
         top: 152px;
@@ -206,6 +208,7 @@ const HomePage: React.FC = () => {
     const { displayedUsers, sorting, loading, error } = useSelector((state: RootState) => state.users)
     const [skeletonCount, setSkeletonCount] = useState(0)
     const isOnline = useNetworkStatus()
+    const { t, i18n } = useTranslation()
 
     useEffect(() => {
         const calculateSkeletons = () => {
@@ -225,8 +228,8 @@ const HomePage: React.FC = () => {
         }
     }, [])
     useEffect(() => {
-        document.title = "Главная"
-    }, [])
+        document.title = i18n.language === "ru" ? "Главная" : "Main"
+    }, [i18n.language])
 
     if (loading) {
         return (
@@ -255,9 +258,9 @@ const HomePage: React.FC = () => {
                 <TopAppBar />
                 <ErrorContainer>
                     <ErrorIcon src={errorIcon} />
-                    <ErrorTitle $mainFont={mainFont}>Какой-то сверхразум всё сломал</ErrorTitle>
-                    <ErrorText $minorFont={minorFont}>Постараемся быстро починить</ErrorText>
-                    <ErrorRetry onClick={() => window.location.reload()}>Попробовать снова</ErrorRetry>
+                    <ErrorTitle $mainFont={mainFont}>{t("home.error")}</ErrorTitle>
+                    <ErrorText $minorFont={minorFont}>{t("home.promise")}</ErrorText>
+                    <ErrorRetry onClick={() => window.location.reload()}>{t("home.retry")}</ErrorRetry>
                 </ErrorContainer>
             </Container>
         )
@@ -280,7 +283,7 @@ const HomePage: React.FC = () => {
                                         <UserTag $minorFont={minorFont}>{user.userTag}</UserTag>
                                     </UserName>
 
-                                    <UserDepartment $auxiliaryFont={auxiliaryFont}>{user.department}</UserDepartment>
+                                    <UserDepartment $auxiliaryFont={auxiliaryFont}>{t("common." + user.department)}</UserDepartment>
                                 </UserInfo>
                                 <UserBirthday $sorting={sorting} $auxiliaryFont={auxiliaryFont}>
                                     {getBriefDisplayedBirthday(user.birthday)}
@@ -292,8 +295,8 @@ const HomePage: React.FC = () => {
             ) : (
                 <ErrorContainer>
                     <ErrorIcon src={nothingFoundIcon} />
-                    <ErrorTitle $mainFont={mainFont}>Мы ничего не нашли</ErrorTitle>
-                    <ErrorText $minorFont={minorFont}>Попробуй скорректировать запрос</ErrorText>
+                    <ErrorTitle $mainFont={mainFont}>{t("home.nothingFound")}</ErrorTitle>
+                    <ErrorText $minorFont={minorFont}>{t("home.adjustQuery")}</ErrorText>
                 </ErrorContainer>
             )}
         </Container>

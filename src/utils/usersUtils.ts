@@ -1,63 +1,31 @@
-import { Department } from "../types"
+import i18n from "../i18n"
 
-export const displayedDepartments = ["Android", "iOS", "Designers", "Managers", "QA", "Бэк-офис", "Frontend", "HR", "PR", "Backend", "Техподдержка", "Analysts"]
-
-export const transformDepartment = (department: string): string => {
-    const departmentMap: Record<string, string> = {
-        android: "Android",
-        ios: "iOS",
-        design: "Designers",
-        management: "Managers",
-        qa: "QA",
-        back_office: "Бэк-офис",
-        frontend: "Frontend",
-        hr: "HR",
-        pr: "PR",
-        backend: "Backend",
-        support: "Техподдержка",
-        analytics: "Analysts",
-    }
-    return departmentMap[department] || ""
-}
-
-export const reverseTransformDepartment = (department: string): Department => {
-    const departmentMap: Record<string, Department> = {
-        Android: "android",
-        iOS: "ios",
-        Designers: "design",
-        Managers: "management",
-        QA: "qa",
-        "Бэк-офис": "back_office",
-        Frontend: "frontend",
-        HR: "hr",
-        PR: "pr",
-        Backend: "backend",
-        Техподдержка: "support",
-        Analysts: "analytics",
-    }
-    return departmentMap[department]
-}
+export const displayedDepartments = ["android", "ios", "design", "management", "qa", "back_office", "frontend", "hr", "pr", "backend", "support", "analytics"]
 
 export const getBriefDisplayedBirthday = (dateString: string) => {
     const date = new Date(dateString)
-
     const day = date.getDate()
 
-    const monthNames = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
-    const month = monthNames[date.getMonth()]
+    const monthNames = {
+        ru: ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"],
+        en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    }
 
+    const month = monthNames[i18n.language as "ru" | "en"][date.getMonth()]
     return `${day} ${month}`
 }
 
 export const getFullfDisplayedBirthday = (dateString: string) => {
     const date = new Date(dateString)
-
     const day = date.getDate()
     const year = date.getFullYear()
 
-    const monthNames = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"]
-    const month = monthNames[date.getMonth()]
+    const monthNames = {
+        ru: ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"],
+        en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    }
 
+    const month = monthNames[i18n.language as "ru" | "en"][date.getMonth()]
     return `${day} ${month} ${year}`
 }
 
@@ -73,13 +41,18 @@ export const getAge = (dateString: string): string => {
     }
 
     let ageString = age.toString()
-    const lastAgeNumber = ageString[ageString.length - 1]
-    if (lastAgeNumber === "2" || lastAgeNumber === "3" || lastAgeNumber === "4") {
-        ageString = ageString + " годa"
-    } else if (lastAgeNumber === "1") {
-        ageString = ageString + " год"
+
+    if (i18n.language === "ru") {
+        const lastAgeNumber = ageString[ageString.length - 1]
+        if (lastAgeNumber === "2" || lastAgeNumber === "3" || lastAgeNumber === "4") {
+            ageString = ageString + " годa"
+        } else if (lastAgeNumber === "1") {
+            ageString = ageString + " год"
+        } else {
+            ageString = ageString + " лет"
+        }
     } else {
-        ageString = ageString + " лет"
+        ageString = ageString + (age === 1 ? " year" : " years")
     }
 
     return ageString

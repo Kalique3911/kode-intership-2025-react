@@ -11,21 +11,22 @@ import modalIcon from "./../assets/ModalIcon.svg"
 import darkThemeIcon from "./../assets/DarkTheme.svg"
 import lightThemeIcon from "./../assets/LightTheme.svg"
 import birthdayModalIcon from "./../assets/BirthdayModalIcon.svg"
-import { displayedDepartments, reverseTransformDepartment, transformDepartment } from "../utils/usersUtils"
+import { displayedDepartments } from "../utils/usersUtils"
 import useNetworkStatus from "../hooks/useNetworkStatus"
 import { ThemeState, toggleTheme } from "../store/slices/themeSlice"
+import { useTranslation } from "react-i18next"
 
 const Container = styled.div``
 
 const TitleContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean }>`
-    padding: 0 32px 0 32px;
-    height: 48px;
-    align-content: center;
-    display: flex;
-    flex-wrap: wrap;
-    color: ${({ $isOnline, $isLoading }) => (!$isOnline || $isLoading ? " #ffffff;" : "")}
-    background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
-`
+        padding: 0 32px 0 32px;
+        height: 48px;
+        align-content: center;
+        display: flex;
+        flex-wrap: wrap;
+        color: ${({ $isOnline, $isLoading }) => (!$isOnline || $isLoading ? " #ffffff;" : "")}
+        background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
+    `
 
 const Title = styled.h1<{ $mainFont: ThemeState["mainFont"] }>`
     margin: 8px 0 0 0;
@@ -35,12 +36,27 @@ const Title = styled.h1<{ $mainFont: ThemeState["mainFont"] }>`
     transition: color 0.3s ease, background 0.3s ease;
 `
 
-const ThemeBlock = styled.div`
+const ThemeBlock = styled.button`
+    margin: 8px 0 0 4px;
+    width: 29px;
+    height: 29px;
+    position: relative;
+    background: none;
+    border: 0px;
+    cursor: pointer;
+`
+
+const LanguageBlock = styled.button<{ $mainFont: ThemeState["mainFont"] }>`
     margin: 8px 0 0 auto;
     width: 29px;
     height: 29px;
+    text-align: center;
+    align-content: center;
+    color: ${({ $mainFont }) => $mainFont};
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    background: none;
+    border: 0px;
     cursor: pointer;
-    position: relative;
 `
 
 const ThemeIcon = styled.img<{ $visible: boolean }>`
@@ -138,13 +154,15 @@ const Tabs = styled.div`
     box-shadow: 0 0.3px 0 0.3px #c3c3c6;
 `
 
-const TabItem = styled.div<{ selected: boolean | undefined; $mainBackground: ThemeState["mainBackground"]; $mainFont: ThemeState["mainFont"]; $minorFont: ThemeState["minorFont"] }>`
+const TabItem = styled.button<{ selected: boolean | undefined; $mainBackground: ThemeState["mainBackground"]; $mainFont: ThemeState["mainFont"]; $minorFont: ThemeState["minorFont"] }>`
     display: flex;
     font-size: 14px;
-    cursor: pointer;
     color: ${({ selected, $mainFont, $minorFont }) => (selected ? $mainFont : $minorFont)};
+    background: none;
+    border: 0px;
     border-bottom: ${({ selected, $mainBackground }) => (selected ? "2px solid #6534ff" : `2px solid ${$mainBackground}`)};
     align-items: center;
+    cursor: pointer;
     transition: color 0.3s ease, border-bottom 0.3s ease;
 `
 
@@ -179,6 +197,7 @@ const TopAppBar = () => {
     const [modal, setModal] = useState(false)
     const { sorting, loading, searchQuery, selectedDepartment } = useSelector((state: RootState) => state.users)
     const { theme, mainFont, mainBackground, auxiliaryBackground, minorFont } = useSelector((state: RootState) => state.theme)
+    const { t, i18n } = useTranslation()
     const [networkIssues, setNetworkIssues] = useState(false)
     const isOnline = useNetworkStatus()
 
@@ -220,10 +239,14 @@ const TopAppBar = () => {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         dispatch(setSearchQuery(event.currentTarget.value))
     }
-    const handleDepartmentChange = (event: React.MouseEvent<HTMLDivElement>) => {
+    const handleDepartmentChange = (event: React.MouseEvent<HTMLButtonElement>) => {
         if (isOnline) {
-            const item = event.currentTarget as HTMLDivElement
-            dispatch(setSelectedDepartment(reverseTransformDepartment(item.innerHTML)))
+            const item = event.currentTarget as HTMLButtonElement
+            if (item.id) {
+                dispatch(setSelectedDepartment(item.id))
+            } else {
+                dispatch(setSelectedDepartment(undefined))
+            }
             const input = document.getElementById("searchInput") as HTMLInputElement
             if (input && searchQuery) {
                 input.value = searchQuery
@@ -247,10 +270,16 @@ const TopAppBar = () => {
     const ThemeBlokClickHandler = () => {
         dispatch(toggleTheme())
     }
+    const changeLanguage = (lng: string) => {
+        i18n.changeLanguage(lng)
+    }
     return (
         <Container>
             <TitleContainer $isOnline={isOnline} $isLoading={loading && networkIssues}>
-                <Title $mainFont={mainFont}>Поиск</Title>
+                <Title $mainFont={mainFont}>{t("search.title")}</Title>
+                <LanguageBlock onClick={() => changeLanguage(i18n.language === "en" ? "ru" : "en")} $mainFont={mainFont}>
+                    {i18n.language === "en" ? "RU" : "EN"}
+                </LanguageBlock>
                 <ThemeBlock onClick={ThemeBlokClickHandler}>
                     <ThemeIcon src={darkThemeIcon} $visible={theme === "light"} />
                     <ThemeIcon src={lightThemeIcon} $visible={theme === "dark"} />
@@ -260,14 +289,15 @@ const TopAppBar = () => {
             <SearchContainer $isOnline={isOnline} $isLoading={loading && networkIssues}>
                 {!isOnline && (
                     <NetworkStatusElement $isOnline={isOnline} $isLoading={loading && networkIssues}>
-                        Не могу обновить данные. Проверь соединение с интернетом.
+                        {t("network.noInternet")}
                     </NetworkStatusElement>
                 )}
-                {networkIssues && loading && (
-                    <NetworkStatusElement $isOnline={isOnline} $isLoading={loading && networkIssues}>
-                        Секундочку, гружусь...
-                    </NetworkStatusElement>
-                )}
+                {networkIssues &&
+                    loading && ( // если не вышло время кэширования, то фиолетовый хэдер не покажется!
+                        <NetworkStatusElement $isOnline={isOnline} $isLoading={loading && networkIssues}>
+                            {t("network.loading")}
+                        </NetworkStatusElement>
+                    )}
 
                 <SearchWrapper $visible={!(networkIssues && loading) && isOnline} $auxiliaryBackground={auxiliaryBackground}>
                     <SearchIconWrapper>
@@ -277,7 +307,7 @@ const TopAppBar = () => {
                     <SearchInput
                         id="searchInput"
                         onChange={handleInputChange}
-                        placeholder={"Введите имя, тег..."}
+                        placeholder={t("search.placeholder")}
                         onFocus={() => setInputFocus(true)}
                         onBlur={() => setInputFocus(false)}
                         $auxiliaryBackground={auxiliaryBackground}
@@ -292,11 +322,11 @@ const TopAppBar = () => {
 
             <Tabs>
                 <TabItem onClick={handleDepartmentChange} selected={selectedDepartment === undefined} $mainBackground={mainBackground} $mainFont={mainFont} $minorFont={minorFont}>
-                    Все
+                    {t("search.all")}
                 </TabItem>
                 {displayedDepartments.map((department) => (
-                    <TabItem onClick={handleDepartmentChange} selected={selectedDepartment && transformDepartment(selectedDepartment) === department} key={department} $mainBackground={mainBackground} $mainFont={mainFont} $minorFont={minorFont}>
-                        {department}
+                    <TabItem onClick={handleDepartmentChange} id={department} selected={selectedDepartment && selectedDepartment === department} key={department} $mainBackground={mainBackground} $mainFont={mainFont} $minorFont={minorFont}>
+                        {t("common." + department)}
                     </TabItem>
                 ))}
             </Tabs>
@@ -304,11 +334,11 @@ const TopAppBar = () => {
             <Modal isOpen={modal} onClose={closeModal}>
                 <ModalLabel onClick={() => checkBoxClickHandler("alphabet")} htmlFor="alphabet-checkbox" $mainFont={mainFont}>
                     <ModalCheckBox checked={sorting === "alphabet"} readOnly={true} id="alphabet-checkbox" />
-                    По алфавиту
+                    {t("modal.sortAlphabet")}
                 </ModalLabel>
                 <ModalLabel onClick={() => checkBoxClickHandler("birthday")} htmlFor="birthday-checkbox" $mainFont={mainFont}>
                     <ModalCheckBox checked={sorting === "birthday"} readOnly={true} id="birthday-checkbox" />
-                    По дню рождения
+                    {t("modal.sortBirthday")}
                 </ModalLabel>
             </Modal>
         </Container>

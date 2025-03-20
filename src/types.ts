@@ -18,7 +18,7 @@ export type DisplayedUser = {
     firstName: string
     lastName: string
     userTag: string
-    department: string
+    department: Department
     position: string
     birthday: string
     phone: string

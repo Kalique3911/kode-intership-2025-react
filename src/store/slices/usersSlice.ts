@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit"
 import { fetchAllUsers, fetchUsersByDepartment, fetchDynamicUsers, fetchError500 } from "../../api"
 import { QueryParams, Users, DisplayedUser, User, Department } from "../../types"
-import { transformDepartment } from "../../utils/usersUtils"
 
 type CacheEntry = {
     data: User[]
@@ -139,7 +138,6 @@ const usersSlice = createSlice({
                 state.cache[cacheKey] = { data: action.payload.items, timestamp: Date.now() }
                 state.users = action.payload.items.map((user: User) => ({
                     ...user,
-                    department: transformDepartment(user.department),
                     firstNextYear: false,
                 }))
 

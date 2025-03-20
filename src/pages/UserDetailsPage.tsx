@@ -11,6 +11,7 @@ import darkPhoneIcon from "../assets/DarkPhoneIcon.svg"
 import birthIcon from "../assets/BirthIcon.svg"
 import { fetchUsers } from "../store/slices/usersSlice"
 import { ThemeState } from "../store/slices/themeSlice"
+import { useTranslation } from "react-i18next"
 
 const Container = styled.div<{ $mainBackground: ThemeState["mainBackground"] }>`
     display: flex;
@@ -127,6 +128,7 @@ const SkeletonAvatar = styled.div`
 const UserDetailsPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>()
     const { id } = useParams<{ id: string }>()
+    const { t } = useTranslation()
     const { displayedUsers, loading } = useSelector((state: RootState) => state.users)
     const { theme, mainBackground, auxiliaryBackground, auxiliaryFont, minorFont, mainFont } = useSelector((state: RootState) => state.theme)
     const user = displayedUsers?.find((u) => u.id === id)
@@ -151,7 +153,7 @@ const UserDetailsPage: React.FC = () => {
                         <BackIcon src={backIcon} />
                     </BackButton>
                     <SkeletonAvatar />
-                    <UserName $mainFont={mainFont}>Пользователь не найден</UserName>
+                    <UserName $mainFont={mainFont}>{t("userDetails.userNotFound")}</UserName>
                 </UserCard>
             </Container>
         )
@@ -168,7 +170,7 @@ const UserDetailsPage: React.FC = () => {
                     {`${user.firstName} ${user.lastName}`}
                     <UserTag $minorFont={minorFont}>{user.userTag}</UserTag>
                 </UserName>
-                <UserDepartment $auxiliaryFont={auxiliaryFont}>{user.department}</UserDepartment>
+                <UserDepartment $auxiliaryFont={auxiliaryFont}>{t("common." + user.department)}</UserDepartment>
             </UserCard>
 
             <UserDetails>

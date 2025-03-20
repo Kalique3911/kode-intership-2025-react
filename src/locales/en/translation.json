@@ -1,0 +1,42 @@
+{
+    "home": {
+        "title": "Home",
+        "error": "Some genius broke everything",
+        "promise": "We'll try to fix it quickly",
+        "retry": "Try again",
+        "nothingFound": "We found nothing",
+        "adjustQuery": "Try adjusting your search"
+    },
+    "search": {
+        "title": "Search",
+        "placeholder": "Enter name, tag...",
+        "all": "All"
+    },
+    "common": {
+        "android": "Android",
+        "ios": "iOS",
+        "design": "Design",
+        "management": "Management",
+        "qa": "QA",
+        "back_office": "Back-office",
+        "frontend": "Frontend",
+        "hr": "HR",
+        "pr": "PR",
+        "backend": "Backend",
+        "support": "Support",
+        "analytics": "Analytics"
+    },
+    "userDetails": {
+        "userNotFound": "User not found",
+        "birthday": "Birthday"
+    },
+    "modal": {
+        "sortTitle": "Sorting",
+        "sortAlphabet": "By alphabet",
+        "sortBirthday": "By birthday"
+    },
+    "network": {
+        "noInternet": "Unable to update data. Check your internet connection.",
+        "loading": "Just a second, loading..."
+    }
+}
