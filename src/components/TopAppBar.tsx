@@ -18,21 +18,20 @@ import { useTranslation } from "react-i18next"
 
 const Container = styled.div``
 
-const TitleContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean }>`
-        padding: 0 32px 0 32px;
-        height: 48px;
-        align-content: center;
-        display: flex;
-        flex-wrap: wrap;
-        color: ${({ $isOnline, $isLoading }) => (!$isOnline || $isLoading ? " #ffffff;" : "")}
-        background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
-    `
+const TitleContainer = styled.div<{ $isOnline: boolean; $isLoading: boolean; $mainFont: ThemeState["mainFont"] }>`
+    padding: 0 32px 0 32px;
+    height: 48px;
+    align-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    color: ${({ $isOnline, $isLoading, $mainFont }) => (!$isOnline || $isLoading ? " #ffffff;" : $mainFont)};
+    background: ${({ $isOnline, $isLoading }) => (!$isOnline && "#f44336") || ($isLoading && "#6534ff")};
+`
 
-const Title = styled.h1<{ $mainFont: ThemeState["mainFont"] }>`
+const Title = styled.h1`
     margin: 8px 0 0 0;
     font-size: 24px;
     height: 29px;
-    color: ${({ $mainFont }) => $mainFont};
     transition: color 0.3s ease, background 0.3s ease;
 `
 
@@ -52,11 +51,11 @@ const LanguageBlock = styled.button<{ $mainFont: ThemeState["mainFont"] }>`
     height: 29px;
     text-align: center;
     align-content: center;
-    color: ${({ $mainFont }) => $mainFont};
     transition: color 0.3s ease, border-bottom 0.3s ease;
     background: none;
     border: 0px;
     cursor: pointer;
+    color: ${({ $mainFont }) => $mainFont};
 `
 
 const ThemeIcon = styled.img<{ $visible: boolean }>`
@@ -152,6 +151,12 @@ const Tabs = styled.div`
     margin-top: 8px;
     height: 36px;
     box-shadow: 0 0.3px 0 0.3px #c3c3c6;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 `
 
 const TabItem = styled.button<{ selected: boolean | undefined; $mainBackground: ThemeState["mainBackground"]; $mainFont: ThemeState["mainFont"]; $minorFont: ThemeState["minorFont"] }>`
@@ -206,6 +211,14 @@ const TopAppBar = () => {
     useEffect(() => {
         if (selectedDepartment) {
             dispatch(fetchUsers({ __example: selectedDepartment }))
+            /* 
+            Запрос на сервер каждый раз при переключении департамента: 
+                Преимущества: актуальность данных, меньше нагрузки на клиентскую память
+                Недостатки: задержки при переключении, нагрузка на сервер, нельзя пользоваться оффлайн
+            Использование предварительно загруженных данных из состояния:
+                Преимущества: быстрое переключение, снижение нагрузки на сервер, можно пользоваться оффлайн
+                Недостатки: данные могут потерять актуальность, может стать проблемой для устройств с ограниченными ресурсами
+            */
         } else {
             dispatch(fetchUsers({}))
         }
@@ -275,15 +288,19 @@ const TopAppBar = () => {
     }
     return (
         <Container>
-            <TitleContainer $isOnline={isOnline} $isLoading={loading && networkIssues}>
-                <Title $mainFont={mainFont}>{t("search.title")}</Title>
-                <LanguageBlock onClick={() => changeLanguage(i18n.language === "en" ? "ru" : "en")} $mainFont={mainFont}>
-                    {i18n.language === "en" ? "RU" : "EN"}
-                </LanguageBlock>
-                <ThemeBlock onClick={ThemeBlokClickHandler}>
-                    <ThemeIcon src={darkThemeIcon} $visible={theme === "light"} />
-                    <ThemeIcon src={lightThemeIcon} $visible={theme === "dark"} />
-                </ThemeBlock>
+            <TitleContainer $isOnline={isOnline} $isLoading={loading && networkIssues} $mainFont={mainFont}>
+                <Title>{t("search.title")}</Title>
+                {isOnline && !loading && (
+                    <LanguageBlock onClick={() => changeLanguage(i18n.language === "en" ? "ru" : "en")} $mainFont={mainFont}>
+                        {i18n.language === "en" ? "RU" : "EN"}
+                    </LanguageBlock>
+                )}
+                {isOnline && !loading && (
+                    <ThemeBlock onClick={ThemeBlokClickHandler}>
+                        <ThemeIcon src={darkThemeIcon} $visible={theme === "light"} />
+                        <ThemeIcon src={lightThemeIcon} $visible={theme === "dark"} />
+                    </ThemeBlock>
+                )}
             </TitleContainer>
 
             <SearchContainer $isOnline={isOnline} $isLoading={loading && networkIssues}>
@@ -292,12 +309,12 @@ const TopAppBar = () => {
                         {t("network.noInternet")}
                     </NetworkStatusElement>
                 )}
-                {networkIssues &&
-                    loading && ( // если не вышло время кэширования, то фиолетовый хэдер не покажется!
-                        <NetworkStatusElement $isOnline={isOnline} $isLoading={loading && networkIssues}>
-                            {t("network.loading")}
-                        </NetworkStatusElement>
-                    )}
+                {networkIssues && loading && (
+                    // если не вышло время кэширования, то фиолетовый хэдер не покажется!!!
+                    <NetworkStatusElement $isOnline={isOnline} $isLoading={loading && networkIssues}>
+                        {t("network.loading")}
+                    </NetworkStatusElement>
+                )}
 
                 <SearchWrapper $visible={!(networkIssues && loading) && isOnline} $auxiliaryBackground={auxiliaryBackground}>
                     <SearchIconWrapper>
