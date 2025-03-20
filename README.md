@@ -1,5 +1,9 @@
 Ковалёв Пётр
 
+Ссылка на gh pages:
+
+https://kalique3911.github.io/kode-intership-2025-react
+
 План:
 
 1. Подготовка проекта

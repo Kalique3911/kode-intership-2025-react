@@ -2,7 +2,7 @@
     "name": "kode-intership-2025-react",
     "private": true,
     "version": "0.0.0",
-    "homepage": "https://Kalique3911.github.io/kode-intership-2025-react",
+    "homepage": "https://kalique3911.github.io/kode-intership-2025-react",
     "type": "module",
     "scripts": {
         "dev": "vite",
