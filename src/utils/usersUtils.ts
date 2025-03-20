@@ -11,7 +11,7 @@ export const getBriefDisplayedBirthday = (dateString: string) => {
         en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     }
 
-    const month = monthNames[i18n.language as "ru" | "en"][date.getMonth()]
+    const month = monthNames[i18n.language === "ru" || i18n.language === "en" ? i18n.language : "en"][date.getMonth()]
     return `${day} ${month}`
 }
 
@@ -25,7 +25,7 @@ export const getFullfDisplayedBirthday = (dateString: string) => {
         en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     }
 
-    const month = monthNames[i18n.language as "ru" | "en"][date.getMonth()]
+    const month = monthNames[i18n.language === "ru" || i18n.language === "en" ? i18n.language : "en"][date.getMonth()]
     return `${day} ${month} ${year}`
 }
 
