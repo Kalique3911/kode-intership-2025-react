@@ -49,8 +49,9 @@ const LanguageBlock = styled.button<{ $mainFont: ThemeState["mainFont"] }>`
     margin: 8px 0 0 auto;
     width: 29px;
     height: 29px;
-    text-align: center;
-    align-content: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     transition: color 0.3s ease, border-bottom 0.3s ease;
     background: none;
     border: 0px;
